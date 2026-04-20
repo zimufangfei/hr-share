@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唯柯HR播报 - 2026年五一劳动节放假通知</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        /* 顶部品牌栏 */
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .brand-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* 主内容卡片 */
+        .notice-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        /* 节日装饰 */
+        .holiday-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .holiday-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+        }
+        .holiday-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+        .holiday-date {
+            color: #6c757d;
+            font-size: 16px;
+        }
+        /* 诗意开篇 */
+        .poem-intro {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-left: 4px solid #e94560;
+            padding: 20px 24px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 32px;
+            font-style: italic;
+            color: #7f1d1d;
+            line-height: 1.8;
+        }
+        /* 正文内容 */
+        .content-section {
+            margin-bottom: 28px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .num {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .notice-text {
+            color: #374151;
+            line-height: 2;
+            font-size: 16px;
+        }
+        /* 日历组件 */
+        .calendar {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .calendar-header span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            gap: 8px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #374151;
+        }
+        .calendar-day.empty {
+            background: transparent;
+        }
+        .calendar-day.weekend {
+            color: #9ca3af;
+        }
+        .calendar-day.holiday {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: white;
+            font-weight: 600;
+        }
+        .calendar-day.work {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .calendar-day .note {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        /* 温馨提示 */
+        .tips-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 32px;
+        }
+        .tips-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 12px;
+        }
+        .tips-list {
+            list-style: none;
+            color: #78350f;
+            font-size: 14px;
+            line-height: 2;
+        }
+        .tips-list li::before {
+            content: "💡 ";
+            margin-right: 8px;
+        }
+        /* 诗意结尾 */
+        .poem-end {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px dashed #e5e7eb;
+        }
+        .poem-end p {
+            font-style: italic;
+            color: #e94560;
+            font-size: 15px;
+            line-height: 2;
+        }
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding: 24px;
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部品牌栏 -->
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon">唯</div>
+                <span class="brand-text">唯柯HR播报</span>
+            </div>
+            <a href="index.html" class="back-btn">🏠 首页</a>
+        </div>
+
+        <!-- 主内容卡片 -->
+        <div class="notice-card">
+            <!-- 节日装饰 -->
+            <div class="holiday-header">
+                <div class="holiday-icon">🎊</div>
+                <h1 class="holiday-title">致敬劳动者</h1>
+                <p class="holiday-date">2026年 · 五一国际劳动节</p>
+            </div>
+
+            <!-- 诗意开篇 -->
+            <div class="poem-intro">
+                春深时节，万物在耕耘中生长；<br>
+                五月之初，时光因奋斗而闪耀。<br>
+                每一滴汗水，都浇灌着梦想的种子；<br>
+                每一份付出，都在时光里结出硕果。<br>
+                在这个属于劳动者的节日里，祝全体唯柯人节日快乐！
+            </div>
+
+            <!-- 放假安排 -->
+            <div class="content-section">
+                <h2 class="section-title">
+                    <span class="num">一</span>
+                    放假安排
+                </h2>
+                <p class="notice-text">
+                    <strong>放假时间</strong>：2026年5月1日（周四）至5月5日（周一），共5天<br><br>
+                    <strong>补班安排</strong>：<br>
+                    • 4月27日（星期日）上班<br>
+                    • 5月9日（星期六）上班
+                </p>
+            </div>
+
+            <!-- 日历视图 -->
+            <div class="calendar">
+                <div class="calendar-header">
+                    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                </div>
+                <div class="calendar-days">
+                    <!-- 4月 -->
+                    <div class="calendar-day empty"></div>
+                    <div class="calendar-day empty"></div>
+                    <div class="calendar-day empty"></div>
+                    <div class="calendar-day empty"></div>
+                    <div class="calendar-day empty"></div>
+                    <div class="calendar-day empty"></div>
+                    <div class="calendar-day work">27<span class="note">班</span></div>
+                    
+                    <div class="calendar-day weekend">28</div>
+                    <div class="calendar-day">29</div>
+                    <div class="calendar-day">30</div>
+                    
+                    <!-- 5月 -->
+                    <div class="calendar-day holiday">1<span class="note">休</span></div>
+                    <div class="calendar-day holiday">2<span class="note">休</span></div>
+                    <div class="calendar-day holiday">3<span class="note">休</span></div>
+                    <div class="calendar-day holiday">4<span class="note">休</span></div>
+                    <div class="calendar-day holiday">5<span class="note">休</span></div>
+                    
+                    <div class="calendar-day weekend">6</div>
+                    <div class="calendar-day weekend">7</div>
+                    <div class="calendar-day">8</div>
+                    <div class="calendar-day work">9<span class="note">班</span></div>
+                    <div class="calendar-day weekend">10</div>
+                    <div class="calendar-day weekend">11</div>
+                    <div class="calendar-day">12</div>
+                </div>
+            </div>
+
+            <!-- 工作提醒 -->
+            <div class="content-section">
+                <h2 class="section-title">
+                    <span class="num">二</span>
+                    工作提醒
+                </h2>
+                <p class="notice-text">
+                    放假前请各部门做好工作交接，确保重要事项有序推进。<br>
+                    假期值班安排请关注各部门内部通知。
+                </p>
+            </div>
+
+            <!-- 温馨提示 -->
+            <div class="tips-section">
+                <h3 class="tips-title">🌟 温馨提示</h3>
+                <ul class="tips-list">
+                    <li>假期出行注意安全，祝一路平安</li>
+                    <li>享受与家人团聚的美好时光</li>
+                    <li>保持通讯畅通，如需帮助随时联系</li>
+                    <li>节后首个工作日请准时到岗</li>
+                </ul>
+            </div>
+
+            <!-- 诗意结尾 -->
+            <div class="poem-end">
+                <p>愿这个假期，成为你辛劳后的温柔犒赏；<br>愿每一份付出，都在时光里结出硕果。</p>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>© 2026 武汉唯柯医疗科技有限公司</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唯柯HR播报 - 企业通知平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        /* 顶部品牌 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 40px rgba(233, 69, 96, 0.3);
+        }
+        .logo span {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header h1 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: rgba(255,255,255,0.7);
+            font-size: 16px;
+        }
+        /* 通知卡片网格 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+        .card-icon.duanwu {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .card-icon.wuyi {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+        }
+        .card h3 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .card .date {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .card .desc {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .card-btn:hover {
+            transform: scale(1.05);
+        }
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部品牌 -->
+        <div class="header">
+            <div class="logo">
+                <span>唯</span>
+            </div>
+            <h1>唯柯HR播报</h1>
+            <p>武汉唯柯医疗科技有限公司 · 企业通知平台</p>
+        </div>
+
+        <!-- 通知卡片 -->
+        <div class="cards-grid">
+            <!-- 端午节 -->
+            <div class="card">
+                <div class="card-icon duanwu">🎏</div>
+                <h3>端午节放假通知</h3>
+                <p class="date">2026年 · 农历五月初五</p>
+                <p class="desc">
+                    放假时间：5月28日至6月1日，共5天<br>
+                    5月9日（周六）上班
+                </p>
+                <a href="duanwu-2026.html" class="card-btn">
+                    📖 查看完整通知
+                </a>
+                <br><br>
+                <a href="duanwu-share.html" class="card-btn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    🔗 分享卡片
+                </a>
+            </div>
+
+            <!-- 五一劳动节 -->
+            <div class="card">
+                <div class="card-icon wuyi">🎊</div>
+                <h3>五一劳动节放假通知</h3>
+                <p class="date">2026年 · 5月1日-5日</p>
+                <p class="desc">
+                    放假时间：5月1日至5月5日，共5天<br>
+                    4月27日（周日）、5月9日（周六）上班
+                </p>
+                <a href="wuyi-2026.html" class="card-btn">
+                    📖 查看完整通知
+                </a>
+                <br><br>
+                <a href="wuyi-share.html" class="card-btn" style="background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);">
+                    🔗 分享卡片
+                </a>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>© 2026 武汉唯柯医疗科技有限公司</p>
+            <p style="margin-top: 10px;">
+                技术支持：<a href="https://github.com/zimufangfei" target="_blank">@zimufangfei</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
