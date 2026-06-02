@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkBuddy 从入门到精通 — 人感PPT</title>
+<style>
+/* ====== CSS Reset & Base ====== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  background: #0f172a;
+  color: #1e293b;
+  overflow: hidden;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====== Container ====== */
+.ppt-container {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column;
+}
+
+/* ====== Top Bar ====== */
+.ppt-topbar {
+  height: 48px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  color: #e2e8f0;
+  font-size: 14px;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.ppt-topbar-left { display: flex; align-items: center; gap: 16px; }
+.ppt-topbar-center { display: flex; align-items: center; gap: 12px; }
+.ppt-topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.ppt-topbar .brand {
+  font-weight: 700; font-size: 16px;
+  background: linear-gradient(135deg, #818cf8, #c084fc);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.ppt-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.ppt-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.ppt-btn.primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); border-color: transparent; color: #fff; font-weight: 600; }
+.ppt-btn.primary:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+.ppt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.page-indicator {
+  font-size: 14px; color: #94a3b8;
+  min-width: 80px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ppt-progress {
+  width: 200px; height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px; overflow: hidden;
+}
+.ppt-progress-bar { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 2px; transition: width 0.5s ease; }
+
+.kbd { 
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  padding: 2px 7px; border-radius: 4px; font-size: 11px; font-family: monospace;
+}
+
+/* ====== Slide Area ====== */
+.ppt-slide-area { flex: 1; position: relative; overflow: hidden; background: #1e293b; }
+
+.ppt-slide {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: #ffffff;
+  overflow-y: auto;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+  padding: 48px 64px;
+  line-height: 1.7;
+  font-size: 17px;
+  /* Background decoration */
+  background-image:
+    radial-gradient(ellipse at 100% 0%, rgba(99,102,241,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 100%, rgba(139,92,246,0.03) 0%, transparent 50%);
+}
+.ppt-slide { transform: translateX(100%); opacity: 0; z-index: 1; }
+.ppt-slide.active { transform: translateX(0); opacity: 1; z-index: 3; }
+
+.ppt-slide.push-out { transform: translateX(-20%); opacity: 0.5; z-index: 2; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease; }
+.ppt-slide.push-in { transform: translateX(0); opacity: 1; z-index: 3; transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease; }
+.ppt-slide.pull-out { transform: translateX(20%); opacity: 0.5; z-index: 2; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease; }
+.ppt-slide.pull-in { transform: translateX(0); opacity: 1; z-index: 3; transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease; }
+
+.ppt-slide::-webkit-scrollbar { width: 6px; }
+.ppt-slide::-webkit-scrollbar-track { background: transparent; }
+.ppt-slide::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+/* Slide number badge */
+.slide-num {
+  position: absolute; bottom: 16px; right: 24px;
+  font-size: 12px; color: #94a3b8;
+  opacity: 0.6;
+}
+
+/* ====== Slide Types ====== */
+
+/* Cover */
+.slide-cover {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100%; text-align: center; position: relative;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #4338ca 100%) !important;
+  background-image: 
+    linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #4338ca 100%),
+    radial-gradient(circle at 20% 80%, rgba(99,102,241,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(192,132,252,0.1) 0%, transparent 50%) !important;
+  color: #fff;
+}
+.cover-badge {
+  display: inline-block; background: rgba(255,255,255,0.1);
+  padding: 6px 20px; border-radius: 20px; font-size: 14px;
+  color: #a5b4fc; margin-bottom: 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+  letter-spacing: 1px;
+}
+.slide-cover h1 {
+  font-size: 56px; font-weight: 800; line-height: 1.15; margin-bottom: 12px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c4b5fd 50%, #fbcfe8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
+}
+.slide-cover .subtitle {
+  font-size: 18px; color: rgba(255,255,255,0.55);
+  max-width: 500px; margin-bottom: 36px;
+}
+.cover-stats-row { display: flex; gap: 48px; margin-bottom: 32px; }
+.cover-stat { text-align: center; }
+.cover-stat-num { display: block; font-size: 40px; font-weight: 800; color: #fbbf24; line-height: 1; }
+.cover-stat-label { display: block; font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 6px; }
+.cover-hint {
+  font-size: 13px; color: rgba(255,255,255,0.25);
+  animation: hintPulse 2s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%,100% { opacity: 0.25; } 50% { opacity: 0.6; }
+}
+.slide-cover .slide-num { color: rgba(255,255,255,0.3); }
+
+/* Chapter Intro */
+.slide-chapter-intro {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100%; text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e8f0fe 100%) !important;
+  background-image:
+    linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e8f0fe 100%),
+    radial-gradient(circle at 80% 20%, rgba(99,102,241,0.06) 0%, transparent 50%) !important;
+}
+.chapter-num-display {
+  font-size: 120px; font-weight: 900; line-height: 1;
+  background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.slide-chapter-intro h2 {
+  font-size: 40px; font-weight: 800; color: #1e293b; margin-bottom: 12px;
+}
+.slide-chapter-intro .intro-desc {
+  font-size: 18px; color: #64748b; max-width: 900px; line-height: 1.7;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 16px;
+}
+
+/* Terminal block */
+.terminal-block {
+  background: #1e293b; border-radius: 12px;
+  padding: 24px 28px; color: #e2e8f0;
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+  border: 1px solid #334155;
+}
+.terminal-block pre {
+  margin: 0; font-size: 15px; line-height: 1.8;
+  white-space: pre-wrap; overflow-wrap: break-word;
+}
+.terminal-block pre code {
+  color: #e2e8f0; font-family: inherit;
+}
+
+/* TOC */
+.slide-toc {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+.slide-toc h2 {
+  font-size: 36px; font-weight: 800; color: #1e293b; text-align: center; margin-bottom: 8px;
+}
+.slide-toc .toc-desc {
+  text-align: center; color: #64748b; font-size: 16px; margin-bottom: 32px;
+}
+.toc-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.toc-card {
+  background: #fff; border-radius: 12px; padding: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+.toc-card { cursor: pointer; }
+.toc-card:hover { box-shadow: 0 4px 12px rgba(99,102,241,0.1); border-color: #c7d2fe; transform: translateY(-1px); }
+.toc-num {
+  font-size: 28px; font-weight: 800; color: #6366f1; line-height: 1;
+}
+.toc-name { font-size: 14px; color: #475569; font-weight: 500; }
+
+/* Content */
+.slide-content h1 {
+  font-size: 30px; font-weight: 800; color: #1e293b;
+  margin-bottom: 24px; padding-bottom: 12px;
+  border-bottom: 3px solid #e2e8f0;
+}
+.content-card {
+  background: #fff; border-radius: 16px; padding: 28px 32px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  margin-bottom: 20px;
+}
+.content-card h2 { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+.content-card h3 { font-size: 20px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+.content-card p { color: #475569; line-height: 1.8; }
+
+.concept-card {
+  background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%);
+  border-color: #c7d2fe;
+}
+.concept-highlight {
+  display: inline-block; background: rgba(99,102,241,0.1);
+  color: #6366f1; padding: 3px 12px; border-radius: 6px;
+  font-size: 13px; font-weight: 600; margin-bottom: 12px;
+}
+
+/* Feature trio */
+.feature-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; background: transparent; border: none; box-shadow: none; padding: 0; }
+.feature-item {
+  background: #fff; border-radius: 16px; padding: 24px; text-align: center;
+  border: 1px solid #e2e8f0; transition: all 0.2s;
+}
+.feature-item:hover { border-color: #c7d2fe; box-shadow: 0 4px 16px rgba(99,102,241,0.08); transform: translateY(-2px); }
+.feature-icon { font-size: 36px; margin-bottom: 12px; }
+.feature-item h3 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.feature-item p { font-size: 14px; color: #64748b; }
+
+/* Compare table */
+.compare-table {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+.compare-row { display: grid; grid-template-columns: 140px 1fr 1fr; padding: 14px 20px; align-items: center; }
+.compare-row + .compare-row { border-top: 1px solid #f1f5f9; }
+.compare-header { background: #f8fafc; font-weight: 700; font-size: 15px; color: #475569; }
+.compare-row div { font-size: 15px; color: #475569; }
+.highlight-col { color: #6366f1 !important; font-weight: 600; }
+
+/* Scene grid */
+.scene-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.scene-card {
+  background: #fff; border-radius: 16px; padding: 20px;
+  border: 1px solid #e2e8f0; transition: all 0.2s;
+  position: relative;
+}
+.scene-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.scene-icon { font-size: 32px; margin-bottom: 10px; }
+.scene-card h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.scene-card p { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 10px; }
+.scene-tag {
+  display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 4px;
+  color: #6366f1; background: rgba(99,102,241,0.08);
+}
+
+/* Steps vertical */
+.steps-vertical { display: flex; flex-direction: column; gap: 0; }
+.step-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #f1f5f9; }
+.step-item:first-child { padding-top: 0; }
+.step-item:last-child { border-bottom: none; padding-bottom: 0; }
+.step-num {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; flex-shrink: 0;
+}
+.step-content h3 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.step-content p { font-size: 15px; color: #64748b; line-height: 1.7; }
+
+/* Steps horizontal */
+.steps-horizontal { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 24px 0; flex-wrap: wrap; }
+.hs-item {
+  text-align: center; background: #fff; padding: 16px 24px;
+  border-radius: 12px; border: 1px solid #e2e8f0;
+}
+.hs-item.highlight-step { border-color: #c7d2fe; background: #eef2ff; }
+.hs-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; margin: 0 auto 8px; font-size: 16px;
+}
+.hs-arrow { font-size: 20px; color: #cbd5e1; }
+
+/* Tip box */
+.tip-box {
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+  padding: 14px 20px; margin-top: 24px; font-size: 15px; color: #92400e;
+  display: flex; align-items: center; gap: 10px;
+}
+.tip-icon { font-size: 18px; flex-shrink: 0; }
+
+/* Example quotes */
+.example-quotes { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.example-quote {
+  background: #f1f5f9; padding: 14px 20px; border-radius: 10px;
+  border-left: 4px solid #6366f1; font-size: 16px; color: #334155;
+  font-style: italic;
+}
+
+/* Layout overview */
+.layout-overview { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 16px; }
+.layout-zone { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; }
+.layout-zone-header { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 12px; }
+.layout-items { display: flex; flex-direction: column; gap: 8px; }
+.layout-items span {
+  background: #f8fafc; padding: 8px 12px; border-radius: 8px;
+  font-size: 14px; color: #64748b;
+}
+
+/* Nav features */
+.nav-features { display: flex; flex-direction: column; gap: 12px; }
+.nav-feature { display: flex; gap: 16px; background: #fff; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.nf-icon { font-size: 28px; flex-shrink: 0; width: 48px; text-align: center; }
+.nf-body h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.nf-body p { font-size: 14px; color: #64748b; }
+
+/* Chat features */
+.chat-features { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.chat-feature { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.chat-feature h3 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.chat-feature p { font-size: 14px; color: #64748b; line-height: 1.6; }
+.chat-feature code {
+  display: block; margin-top: 8px; padding: 8px 12px; background: #f1f5f9;
+  border-radius: 6px; font-size: 13px; color: #6366f1;
+}
+
+/* Result features */
+.result-features { display: flex; flex-direction: column; gap: 12px; }
+.result-feature { display: flex; gap: 16px; background: #fff; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.rf-icon { font-size: 28px; flex-shrink: 0; }
+.rf-body h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.rf-body p { font-size: 14px; color: #64748b; }
+
+/* Claw flow */
+.claw-flow { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 24px 0; flex-wrap: wrap; }
+.claw-node {
+  background: #fff; padding: 16px 24px; border-radius: 12px; border: 1px solid #e2e8f0;
+  font-size: 15px; font-weight: 600; text-align: center;
+}
+.claw-arrow { font-size: 18px; color: #94a3b8; }
+
+/* Platform grid */
+.platform-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+.platform-card { background: #fff; padding: 16px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+.platform-icon { font-size: 28px; margin-bottom: 8px; }
+.platform-card h3 { font-size: 15px; color: #1e293b; margin-bottom: 4px; }
+.platform-card p { font-size: 12px; color: #94a3b8; }
+
+/* Scene tags */
+.scene-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.scene-tags span {
+  background: #f1f5f9; padding: 8px 16px; border-radius: 20px;
+  font-size: 13px; color: #475569;
+}
+
+/* Triple cards */
+.triple-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+.triple-card { background: #fff; padding: 24px; border-radius: 16px; text-align: center; border: 1px solid #e2e8f0; }
+.triple-num {
+  width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; margin: 0 auto 12px;
+}
+.triple-card h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.triple-card p { font-size: 14px; color: #64748b; }
+.triple-card code { display: block; margin-top: 8px; font-size: 12px; color: #6366f1; background: #eef2ff; padding: 6px 10px; border-radius: 6px; }
+
+/* Task mgmt grid */
+.task-mgmt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.mgmt-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.mgmt-card h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.mgmt-card p { font-size: 14px; color: #64748b; }
+
+/* Tips list */
+.tips-list { display: flex; flex-direction: column; gap: 14px; }
+.tip-card { display: flex; gap: 16px; background: #fff; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0; }
+.tip-num { font-size: 24px; flex-shrink: 0; width: 40px; }
+.tip-body h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.tip-body p { font-size: 14px; color: #64748b; line-height: 1.7; }
+
+/* Mode grid */
+.mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.mode-card {
+  background: #fff; padding: 28px 24px; border-radius: 16px; text-align: center;
+  border: 2px solid #e2e8f0; transition: all 0.2s;
+}
+.mode-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+.mode-card.mode-craft { border-color: #c7d2fe; }
+.mode-card.mode-plan { border-color: #fde68a; }
+.mode-card.mode-ask { border-color: #a7f3d0; }
+.mode-icon { font-size: 40px; margin-bottom: 12px; }
+.mode-card h3 { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.mode-desc { font-size: 15px; color: #6366f1; font-weight: 600; margin-bottom: 8px; }
+.mode-card p { font-size: 14px; color: #64748b; }
+.mode-badge {
+  display: inline-block; margin-top: 10px; padding: 3px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+}
+.mode-craft .mode-badge { background: #eef2ff; color: #6366f1; }
+.mode-plan .mode-badge { background: #fffbeb; color: #d97706; }
+.mode-ask .mode-badge { background: #ecfdf5; color: #059669; }
+
+/* Model tips */
+.model-tips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+.model-tip { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+.model-tip h3 { font-size: 16px; color: #1e293b; margin-bottom: 6px; }
+.model-tip p { font-size: 14px; color: #64748b; }
+
+/* Checklist */
+.checklist { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+.check-item {
+  background: #f0fdf4; padding: 12px 18px; border-radius: 10px;
+  border-left: 3px solid #22c55e; font-size: 15px; color: #166534;
+}
+
+/* Expert grid */
+.expert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+.expert-card { background: #fff; padding: 20px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+.expert-icon { font-size: 32px; margin-bottom: 8px; }
+.expert-card h3 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.expert-card p { font-size: 13px; color: #64748b; }
+
+/* Compare triple */
+.compare-triple { display: flex; align-items: stretch; gap: 0; margin-top: 20px; }
+.ct-card { flex: 1; background: #fff; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; }
+.ct-divider { display: flex; align-items: center; justify-content: center; width: 40px; flex-shrink: 0; }
+.ct-arrow { font-size: 24px; color: #94a3b8; }
+.ct-icon { font-size: 32px; margin-bottom: 8px; }
+.ct-card h3 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.ct-card > p { font-size: 14px; color: #6366f1; font-weight: 600; margin-bottom: 10px; }
+.ct-card ul { list-style: none; text-align: left; margin-bottom: 10px; }
+.ct-card ul li { font-size: 13px; color: #64748b; padding: 4px 0; }
+.ct-card ul li::before { content: "• "; color: #6366f1; }
+.ct-example { display: block; font-size: 12px; color: #94a3b8; margin-top: 8px; font-style: italic; }
+
+/* Evolution path */
+.evolution-path { display: flex; align-items: center; justify-content: center; gap: 24px; }
+.evo-stage { text-align: center; background: #fff; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; min-width: 180px; }
+.evo-circle {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 18px; margin: 0 auto 12px;
+}
+.evo-circle.evo-active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+.evo-stage h3 { font-size: 17px; color: #1e293b; margin-bottom: 4px; }
+.evo-stage p { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+.evo-tag { font-size: 11px; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; color: #6366f1; }
+.evo-arrow { font-size: 24px; color: #94a3b8; }
+
+/* Layer diagram */
+.layer-diagram { display: flex; flex-direction: column; gap: 12px; }
+.layer-card {
+  padding: 18px 24px; border-radius: 12px; border: 1px solid #e2e8f0;
+  background: #fff;
+}
+.layer-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.layer-card p { font-size: 14px; color: #64748b; }
+.layer-1 { border-left: 4px solid #6366f1; }
+.layer-2 { border-left: 4px solid #8b5cf6; }
+.layer-3 { border-left: 4px solid #a78bfa; }
+.layer-4 { border-left: 4px solid #c084fc; }
+.layer-5 { border-left: 4px solid #e879f9; }
+
+/* Benefit grid */
+.benefit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 20px; }
+.benefit-card { background: #fff; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0; }
+.benefit-card h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.benefit-card p { font-size: 14px; color: #64748b; }
+
+/* Config files */
+.config-files { display: flex; flex-direction: column; gap: 12px; }
+.config-file {
+  background: #fff; padding: 18px 22px; border-radius: 14px;
+  border: 1px solid #e2e8f0;
+}
+.cf-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.cf-header h3 { font-size: 18px; font-weight: 700; color: #1e293b; }
+.cf-badge {
+  font-size: 11px; background: #eef2ff; color: #6366f1; padding: 2px 10px; border-radius: 4px;
+}
+.config-file p { font-size: 14px; color: #64748b; margin-bottom: 8px; }
+.config-file code { font-size: 12px; color: #94a3b8; }
+
+/* Memory layers */
+.memory-layers { display: flex; flex-direction: column; gap: 12px; }
+.memory-layer { background: #fff; padding: 18px 22px; border-radius: 14px; border: 1px solid #e2e8f0; }
+.ml-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.ml-num {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+  padding: 2px 10px; border-radius: 6px; font-size: 13px; font-weight: 700;
+}
+.ml-header h3 { font-size: 17px; font-weight: 700; color: #1e293b; }
+.memory-layer p { font-size: 14px; color: #64748b; }
+.ml-tag {
+  display: inline-block; font-size: 11px; background: #f1f5f9; padding: 2px 8px;
+  border-radius: 4px; color: #6366f1; margin-top: 4px;
+}
+
+/* Skill shop */
+.skill-shop-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 20px; }
+.skill-step { background: #fff; padding: 20px; border-radius: 14px; text-align: center; border: 1px solid #e2e8f0; }
+.ss-num { font-size: 28px; margin-bottom: 8px; }
+.skill-step h3 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.skill-step p { font-size: 13px; color: #64748b; }
+
+/* Explore features */
+.explore-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 20px; }
+.explore-feat { background: #fff; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.explore-feat h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.explore-feat p { font-size: 14px; color: #64748b; }
+
+/* Connector overview */
+.connector-overview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.connector-card { background: #fff; padding: 16px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+.cc-icon { font-size: 28px; margin-bottom: 6px; }
+.connector-card h3 { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.connector-card p { font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+.cc-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #f1f5f9; color: #64748b; }
+.cc-status.connected { background: #ecfdf5; color: #059669; }
+
+/* Auth types */
+.auth-types { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.auth-types div {
+  background: #f8fafc; padding: 10px 16px; border-radius: 8px;
+  font-size: 14px; color: #475569;
+}
+
+/* Auto examples */
+.auto-examples { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+.auto-example { display: flex; gap: 16px; background: #fff; padding: 18px; border-radius: 14px; border: 1px solid #e2e8f0; }
+.ae-icon { font-size: 32px; flex-shrink: 0; }
+.ae-body h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.ae-body p { font-size: 14px; color: #64748b; margin-bottom: 8px; }
+.ae-body code {
+  display: inline-block; font-size: 12px; background: #f1f5f9;
+  padding: 4px 10px; border-radius: 6px; color: #6366f1;
+}
+
+/* Ending */
+.slide-ending {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100%; text-align: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #4338ca 100%) !important;
+  background-image: 
+    linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #4338ca 100%),
+    radial-gradient(circle at 30% 70%, rgba(99,102,241,0.2) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(192,132,252,0.15) 0%, transparent 50%) !important;
+  color: #fff;
+}
+.ending-content h2 {
+  font-size: 40px; font-weight: 800;
+  background: linear-gradient(135deg, #e0e7ff, #c4b5fd);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+.ending-content > p { font-size: 18px; color: rgba(255,255,255,0.55); margin-bottom: 36px; }
+.ending-actions { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; justify-content: center; }
+.ending-action {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  padding: 12px 24px; border-radius: 12px; font-size: 14px; color: rgba(255,255,255,0.8);
+}
+.ending-footer { font-size: 13px; color: rgba(255,255,255,0.3); }
+.slide-ending .slide-num { color: rgba(255,255,255,0.3); }
+
+/* TOC dropdown */
+.toc-dropdown {
+  display: none; position: absolute; top: 52px; left: 20px;
+  background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+  padding: 12px; max-height: 70vh; overflow-y: auto; z-index: 200;
+  min-width: 220px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.toc-dropdown.show { display: block; }
+.toc-dropdown a {
+  display: block; padding: 8px 14px; border-radius: 8px;
+  color: #cbd5e1; font-size: 14px; text-decoration: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.toc-dropdown a:hover, .toc-dropdown a.active-toc { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+
+/* ====== Presenter Mode (Fullscreen) ====== */
+.presenter-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: #0f172a; z-index: 1000;
+  flex-direction: column;
+  cursor: default;
+}
+.presenter-overlay.show { display: flex; }
+
+/* Timer bar */
+.presenter-timer-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 20px; background: rgba(30,41,59,0.95);
+  color: #e2e8f0; flex-shrink: 0;
+  border-bottom: 1px solid #1e293b;
+}
+.presenter-timer-bar .timer-display {
+  font-size: 22px; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: #a5b4fc;
+}
+.presenter-timer-bar .timer-actions { display: flex; gap: 8px; }
+
+/* Nav bar */
+.presenter-nav-bar {
+  display: flex; justify-content: center; align-items: center; gap: 16px;
+  padding: 10px 20px; background: rgba(30,41,59,0.95);
+  color: #e2e8f0; flex-shrink: 0;
+  border-top: 1px solid #1e293b;
+}
+.presenter-nav-bar .page-indicator {
+  color: #94a3b8; font-size: 14px; min-width: 70px; text-align: center;
+}
+
+/* Slide area (main content) */
+.presenter-slide-area {
+  flex: 1; overflow: hidden; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.presenter-slide-area .ppt-slide {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  transform: none !important; opacity: 1 !important;
+  padding: 36px 56px; overflow-y: auto;
+  font-size: 17px;
+}
+.presenter-slide-area .ppt-slide:not(.active) { display: none; }
+
+/* Mouse click hint */
+.presenter-click-hint {
+  position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.7); color: rgba(255,255,255,0.8);
+  padding: 8px 20px; border-radius: 20px; font-size: 13px;
+  pointer-events: none; z-index: 1001;
+  display: flex; align-items: center; gap: 12px;
+  animation: hintFadeIn 0.8s ease;
+}
+.presenter-click-hint .mouse-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 6px;
+}
+.presenter-click-hint .mouse-icon { font-size: 14px; }
+@keyframes hintFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.presenter-click-hint.fading {
+  animation: hintFadeOut 0.5s ease forwards;
+}
+@keyframes hintFadeOut {
+  to { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 1024px) {
+  .ppt-slide { padding: 32px; }
+  .toc-grid { grid-template-columns: repeat(3, 1fr); }
+  .platform-grid { grid-template-columns: repeat(3, 1fr); }
+  .connector-overview { grid-template-columns: repeat(3, 1fr); }
+  .skill-shop-steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .ppt-slide { padding: 24px; }
+  .slide-cover h1 { font-size: 36px; }
+  .toc-grid { grid-template-columns: repeat(2, 1fr); }
+  .scene-grid { grid-template-columns: repeat(2, 1fr); }
+  .feature-trio { grid-template-columns: 1fr; }
+  .platform-grid { grid-template-columns: repeat(2, 1fr); }
+  .connector-overview { grid-template-columns: repeat(2, 1fr); }
+  .mode-grid { grid-template-columns: 1fr; }
+  .expert-grid { grid-template-columns: repeat(2, 1fr); }
+  .triple-cards { grid-template-columns: 1fr; }
+}
+
+/* ====== Bottom Bar ====== */
+.ppt-bottombar {
+  height: 52px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 20px; gap: 16px;
+  color: #e2e8f0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.ppt-btn { padding: 6px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+.ppt-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); }
+.ppt-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ppt-btn.primary { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-color: transparent; }
+.ppt-btn.primary:hover:not(:disabled) { background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%); }
+.ppt-bottombar .page-jump {
+  display: flex; align-items: center; gap: 6px;
+}
+.ppt-bottombar .page-jump input {
+  width: 52px; height: 32px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 6px; color: #e2e8f0;
+  text-align: center; font-size: 14px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  outline: none; transition: border-color 0.2s;
+}
+.ppt-bottombar .page-jump input:focus {
+  border-color: #818cf8;
+}
+.ppt-bottombar .page-jump span {
+  font-size: 13px; color: #94a3b8;
+}
+
+/* Print */
+@media print {
+  body { overflow: auto; }
+  .ppt-container { position: static; }
+  .ppt-topbar { display: none; }
+  .ppt-bottombar { display: none; }
+  .ppt-slide-area { overflow: visible; }
+  .ppt-slide { position: relative; transform: none !important; opacity: 1 !important; page-break-after: always; height: auto; min-height: 100vh; }
+}
+
+@media(max-width:768px){
+  .ppt-slide{padding:24px 20px !important;font-size:15px}
+  .ppt-topbar{height:40px;padding:0 10px}
+  .ppt-topbar .brand{font-size:14px}
+  .ppt-progress{width:100px}
+  .page-indicator{font-size:12px}
+  .kbd{display:none}
+  h1{font-size:22px !important}
+  h2{font-size:18px !important}
+  .mode-grid{grid-template-columns:1fr !important}
+  .slide-cover h1{font-size:28px !important}
+  .toc-grid{grid-template-columns:1fr 1fr !important}
+  .chapter-intro h2{font-size:28px !important}
+}
+@media(max-width:480px){
+  .ppt-slide{padding:16px 12px !important;font-size:14px}
+  .toc-grid{grid-template-columns:1fr !important}
+  .steps-horizontal{flex-direction:column !important}
+}
+
+</style>
+</head>
+<body>
+<div class="ppt-container">
+  <div class="ppt-topbar">
+    <div class="ppt-topbar-left">
+      <span class="brand">WorkBuddy 从入门到精通</span>
+      <button class="ppt-btn" onclick="toggleToc()">☰ 目录</button>
+    </div>
+    <div class="ppt-topbar-right">
+      <div class="ppt-progress"><div class="ppt-progress-bar" id="progressBar" style="width:2.2%"></div></div>
+      <span class="page-indicator" id="pageIndicator" style="font-size:13px;color:#94a3b8">1 / 46</span>
+      <button class="ppt-btn" onclick="togglePresenter()" title="演讲者模式">🎤 演讲模式</button>
+      <button class="ppt-btn" onclick="toggleFullscreen()" title="全屏">⛶</button>
+    </div>
+  </div>
+
+  <div class="toc-dropdown" id="tocDropdown">
+
+    <a href="#" onclick="goToPage(0);toggleToc();return false;" style="font-weight:600">📖 WorkBuddy 从入门到精通</a>
+
+    <a href="#" onclick="goToPage(1);toggleToc();return false;" style="font-weight:600">📋 课程目录</a>
+
+    <a href="#" onclick="goToPage(2);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 1. 产品初探</a>
+
+    <a href="#" onclick="goToPage(3);toggleToc();return false;" style="padding-left:16px">  什么是WorkBuddy</a>
+
+    <a href="#" onclick="goToPage(4);toggleToc();return false;" style="padding-left:16px">  核心优势对比</a>
+
+    <a href="#" onclick="goToPage(5);toggleToc();return false;" style="padding-left:16px">  典型使用场景</a>
+
+    <a href="#" onclick="goToPage(6);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 2. 快速入门指南</a>
+
+    <a href="#" onclick="goToPage(7);toggleToc();return false;" style="padding-left:16px">  安装与环境配置</a>
+
+    <a href="#" onclick="goToPage(8);toggleToc();return false;" style="padding-left:16px">  首次对话体验</a>
+
+    <a href="#" onclick="goToPage(9);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 3. 界面功能详解</a>
+
+    <a href="#" onclick="goToPage(10);toggleToc();return false;" style="padding-left:16px">  界面布局总览</a>
+
+    <a href="#" onclick="goToPage(11);toggleToc();return false;" style="padding-left:16px">  左侧导航栏功能</a>
+
+    <a href="#" onclick="goToPage(12);toggleToc();return false;" style="padding-left:16px">  中间对话区详解</a>
+
+    <a href="#" onclick="goToPage(13);toggleToc();return false;" style="padding-left:16px">  右侧结果区详解</a>
+
+    <a href="#" onclick="goToPage(14);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 4. 远程控制Claw</a>
+
+    <a href="#" onclick="goToPage(15);toggleToc();return false;" style="padding-left:16px">  什么是Claw</a>
+
+    <a href="#" onclick="goToPage(16);toggleToc();return false;" style="padding-left:16px">  支持的平台与场景</a>
+
+    <a href="#" onclick="goToPage(17);toggleToc();return false;" style="padding-left:16px">  Claw接入指南</a>
+
+    <a href="#" onclick="goToPage(18);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 5. 任务创建与管理</a>
+
+    <a href="#" onclick="goToPage(19);toggleToc();return false;" style="padding-left:16px">  如何创建任务</a>
+
+    <a href="#" onclick="goToPage(20);toggleToc();return false;" style="padding-left:16px">  管理已有任务</a>
+
+    <a href="#" onclick="goToPage(21);toggleToc();return false;" style="padding-left:16px">  高效对话技巧</a>
+
+    <a href="#" onclick="goToPage(22);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 6. 高级选项设置</a>
+
+    <a href="#" onclick="goToPage(23);toggleToc();return false;" style="padding-left:16px">  工作模式选择</a>
+
+    <a href="#" onclick="goToPage(24);toggleToc();return false;" style="padding-left:16px">  切换模型与技能</a>
+
+    <a href="#" onclick="goToPage(25);toggleToc();return false;" style="padding-left:16px">  设置工作目录</a>
+
+    <a href="#" onclick="goToPage(26);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 7. 专家中心</a>
+
+    <a href="#" onclick="goToPage(27);toggleToc();return false;" style="padding-left:16px">  专家与专家团</a>
+
+    <a href="#" onclick="goToPage(28);toggleToc();return false;" style="padding-left:16px">  操作流程</a>
+
+    <a href="#" onclick="goToPage(29);toggleToc();return false;" style="padding-left:16px">  Skill、专家与专家团</a>
+
+    <a href="#" onclick="goToPage(30);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 8. 进阶配置体系</a>
+
+    <a href="#" onclick="goToPage(31);toggleToc();return false;" style="padding-left:16px">  从助手到智能体</a>
+
+    <a href="#" onclick="goToPage(32);toggleToc();return false;" style="padding-left:16px">  能力层设计模式</a>
+
+    <a href="#" onclick="goToPage(33);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 9. 角色定义</a>
+
+    <a href="#" onclick="goToPage(34);toggleToc();return false;" style="padding-left:16px">  角色设定的意义</a>
+
+    <a href="#" onclick="goToPage(35);toggleToc();return false;" style="padding-left:16px">  核心配置文件详解</a>
+
+    <a href="#" onclick="goToPage(36);toggleToc();return false;" style="padding-left:16px">  创建你的第一个角色</a>
+
+    <a href="#" onclick="goToPage(37);toggleToc();return false;" style="padding-left:16px">  记忆持久化层</a>
+
+    <a href="#" onclick="goToPage(38);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 10. 能力深化与探索</a>
+
+    <a href="#" onclick="goToPage(39);toggleToc();return false;" style="padding-left:16px">  技能市场操作指南</a>
+
+    <a href="#" onclick="goToPage(40);toggleToc();return false;" style="padding-left:16px">  探索功能详解</a>
+
+    <a href="#" onclick="goToPage(41);toggleToc();return false;" style="padding-left:22px;font-weight:600;color:#a5b4fc">📘 11. 连接器与自动化</a>
+
+    <a href="#" onclick="goToPage(42);toggleToc();return false;" style="padding-left:16px">  连接器全景概览</a>
+
+    <a href="#" onclick="goToPage(43);toggleToc();return false;" style="padding-left:16px">  连接器操作指南</a>
+
+    <a href="#" onclick="goToPage(44);toggleToc();return false;" style="padding-left:16px">  自动化任务编排</a>
+
+    <a href="#" onclick="goToPage(45);toggleToc();return false;" style="font-weight:600">🎉 谢谢观看</a>
+
+  </div>
+
+  <div class="ppt-slide-area" id="slideArea">
+
+    <div class="ppt-slide slide-cover active" data-page="0" data-notes="">
+
+      <h1>WorkBuddy 从入门到精通</h1>
+
+      <div class="subtitle">打造你的专属智能工作伙伴</div>
+
+      <div class="cover-badge">AIGC工坊 · 2026.05.28</div>
+<div class="cover-stats-row">
+  <div class="cover-stat"><span class="cover-stat-num">11</span><span class="cover-stat-label">核心章节</span></div>
+  <div class="cover-stat"><span class="cover-stat-num">46</span><span class="cover-stat-label">知识页面</span></div>
+  <div class="cover-stat"><span class="cover-stat-num">5</span><span class="cover-stat-label">分钟上手</span></div>
+</div>
+
+      <div class="cover-hint">按 → 或 空格键 开始浏览 · 按 F 进入全屏</div>
+
+      <div class="slide-num">1 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-toc" data-page="1" data-notes="">
+
+      <h2>课程目录</h2>
+
+      <div class="toc-desc">11大模块 · 从零基础到深度定制</div>
+
+      <div class="toc-grid">
+<div class="toc-card" onclick="goToPage(2)"><span class="toc-num">01</span><span class="toc-name">产品初探</span></div>
+<div class="toc-card" onclick="goToPage(6)"><span class="toc-num">02</span><span class="toc-name">快速入门指南</span></div>
+<div class="toc-card" onclick="goToPage(9)"><span class="toc-num">03</span><span class="toc-name">界面功能详解</span></div>
+<div class="toc-card" onclick="goToPage(14)"><span class="toc-num">04</span><span class="toc-name">远程控制Claw</span></div>
+<div class="toc-card" onclick="goToPage(18)"><span class="toc-num">05</span><span class="toc-name">任务创建与管理</span></div>
+<div class="toc-card" onclick="goToPage(22)"><span class="toc-num">06</span><span class="toc-name">高级选项设置</span></div>
+<div class="toc-card" onclick="goToPage(26)"><span class="toc-num">07</span><span class="toc-name">专家中心</span></div>
+<div class="toc-card" onclick="goToPage(30)"><span class="toc-num">08</span><span class="toc-name">进阶配置体系</span></div>
+<div class="toc-card" onclick="goToPage(33)"><span class="toc-num">09</span><span class="toc-name">角色定义</span></div>
+<div class="toc-card" onclick="goToPage(38)"><span class="toc-num">10</span><span class="toc-name">能力深化与探索</span></div>
+<div class="toc-card" onclick="goToPage(41)"><span class="toc-num">11</span><span class="toc-name">连接器与自动化</span></div>
+</div>
+
+      <div class="slide-num">2 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="2" data-notes="第1章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">1</div>
+
+      <h2>产品初探</h2>
+
+      <div class="intro-desc">了解WorkBuddy的核心定位、独特优势与典型应用场景，开启高效办公新纪元。</div>
+
+      <div class="slide-num">3 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="3" data-notes="强调三个关键点：听懂人话、带脑子思考、实际干活。这是与普通AI助手最本质的区别。">
+
+      <h1>什么是WorkBuddy</h1>
+
+      <div class="content-card concept-card">
+<div class="concept-highlight">一句话定义</div>
+<h2>腾讯推出的全场景职场 AI 智能体桌面工作台</h2>
+<p>您只需用<strong>一句话描述需求</strong>，WorkBuddy 便能像同事一样<strong>自主规划和执行复杂任务</strong>，并交付可验收的结果。</p>
+</div>
+<div class="content-card feature-trio">
+<div class="feature-item"><div class="feature-icon">🧠</div><h3>听懂人话</h3><p>用自然语言描述需求，无需复杂操作</p></div>
+<div class="feature-item"><div class="feature-icon">💡</div><h3>带脑子思考</h3><p>自动拆解任务、规划步骤</p></div>
+<div class="feature-item"><div class="feature-icon">🛠️</div><h3>实际干活</h3><p>操作本地文件，批量处理数据</p></div>
+</div>
+
+      <div class="slide-num">4 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="4" data-notes="重点突出多任务并行和本地文件操作这两项独有能力，是竞品不具备的。">
+
+      <h1>核心优势对比</h1>
+
+      <div class="compare-table">
+<div class="compare-row compare-header">
+  <div>能力维度</div><div>传统AI助手</div><div class="highlight-col">WorkBuddy</div>
+</div>
+<div class="compare-row"><div>任务下达</div><div>需明确指令</div><div class="highlight-col">一句话描述即可</div></div>
+<div class="compare-row"><div>任务规划</div><div>单轮问答</div><div class="highlight-col">自主拆解+多步执行</div></div>
+<div class="compare-row"><div>并行能力</div><div>一次一个</div><div class="highlight-col">多任务同时推进</div></div>
+<div class="compare-row"><div>文件操作</div><div>仅文字处理</div><div class="highlight-col">读写本地文件+批量处理</div></div>
+<div class="compare-row"><div>交付物</div><div>文字回复</div><div class="highlight-col">文档/表格/PPT/代码 可直接用</div></div>
+</div>
+
+      <div class="slide-num">5 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="5" data-notes="根据听众背景选择合适的场景案例。如果是技术团队，多讲编程模式；如果是业务团队，多讲文档和数据分析。">
+
+      <h1>典型使用场景</h1>
+
+      <div class="scene-grid">
+<div class="scene-card scene-blue">
+  <div class="scene-icon">📊</div>
+  <h3>工作报告生成</h3>
+  <p>"帮我把这个季度销售数据整理成分析报告"</p>
+  <span class="scene-tag">文档生成</span>
+</div>
+<div class="scene-card scene-green">
+  <div class="scene-icon">📈</div>
+  <h3>数据分析可视化</h3>
+  <p>"上传这份Excel，帮我做数据分析和图表"</p>
+  <span class="scene-tag">数据分析</span>
+</div>
+<div class="scene-card scene-purple">
+  <div class="scene-icon">🎨</div>
+  <h3>PPT/演示文稿</h3>
+  <p>"根据这份需求文档帮我生成一个产品发布PPT"</p>
+  <span class="scene-tag">PPT生成</span>
+</div>
+<div class="scene-card scene-orange">
+  <div class="scene-icon">💻</div>
+  <h3>编程开发辅助</h3>
+  <p>"帮我写一个数据分析的Python脚本"</p>
+  <span class="scene-tag">编程模式</span>
+</div>
+<div class="scene-card scene-teal">
+  <div class="scene-icon">📁</div>
+  <h3>批量文件处理</h3>
+  <p>"把这个文件夹里的图片按日期重命名并分类"</p>
+  <span class="scene-tag">文件处理</span>
+</div>
+<div class="scene-card scene-red">
+  <div class="scene-icon">🔍</div>
+  <h3>深度调研</h3>
+  <p>"研究一下竞品在该领域的市场策略，输出调研报告"</p>
+  <span class="scene-tag">深度研究</span>
+</div>
+</div>
+
+      
+      <div style="margin-top:10px;padding:8px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:12px;font-weight:500;color:#166534">🏠 学习理解后：打开练习包完成模块1·认识AI助手（1.1一句话定义 + 1.2场景选择）</div>
+      <div class="slide-num">6 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="6" data-notes="第2章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">2</div>
+
+      <h2>快速入门指南</h2>
+
+      <div class="intro-desc">从安装配置到第一次对话，5分钟带你走完WorkBuddy的完整使用流程，即刻体验AI办公。</div>
+
+      <div class="slide-num">7 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="7" data-notes="强调整个过程只需3-5分钟，消除技术门槛顾虑。确认听众中是否有人需要帮助安装。">
+
+      <h1>安装与环境配置</h1>
+
+      <div class="steps-vertical">
+<div class="step-item">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h3>系统要求</h3>
+    <p>Windows / macOS 操作系统，需要稳定的网络连接以调用 AI 模型服务</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h3>下载安装</h3>
+    <p>从官方渠道下载 WorkBuddy 安装包，双击运行安装向导完成安装</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h3>账号注册/登录</h3>
+    <p>打开 WorkBuddy，使用企业微信或手机号注册登录账号</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h3>完成准备</h3>
+    <p>登录后进入主界面，出现欢迎语和输入框，即可开始使用</p>
+  </div>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">⚡</span> 整个安装过程约 3-5 分钟，无需任何技术背景</div>
+
+      <div class="slide-num">8 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="8" data-notes="邀请一位听众现场尝试第一个任务。准备几个简单的示例需求供选择。">
+
+      <h1>首次对话体验</h1>
+
+      <div class="content-card">
+<h2>在输入框中用一句话描述你的需求：</h2>
+</div>
+<div class="example-quotes">
+<div class="example-quote">"帮我把这份销售数据生成一个分析报告"</div>
+<div class="example-quote">"整理这个文件夹里的图片，按日期重命名"</div>
+<div class="example-quote">"根据这份需求文档生成一个 PPT"</div>
+</div>
+<div class="steps-horizontal">
+<div class="hs-item">
+  <div class="hs-icon">1</div>
+  <p>输入需求</p>
+</div>
+<div class="hs-arrow">→</div>
+<div class="hs-item">
+  <div class="hs-icon">2</div>
+  <p>选择模型</p>
+</div>
+<div class="hs-arrow">→</div>
+<div class="hs-item">
+  <div class="hs-icon">3</div>
+  <p>按回车</p>
+</div>
+<div class="hs-arrow">→</div>
+<div class="hs-item">
+  <div class="hs-icon">4</div>
+  <p>AI自动执行</p>
+</div>
+<div class="hs-arrow">→</div>
+<div class="hs-item highlight-step">
+  <div class="hs-icon">✓</div>
+  <p>查看结果</p>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">💡</span> 可以同时新建多个任务，让它们并行推进！</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成「模块2 · 5分钟上手」练习（2.1-2.3）</div>
+      
+      
+      <div class="slide-num">9 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="9" data-notes="第3章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">3</div>
+
+      <h2>界面功能详解</h2>
+
+      <div class="intro-desc">深度剖析WorkBuddy主界面的三大核心区域，助你快速上手，熟练驾驭AI助手。</div>
+
+      <div class="slide-num">10 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="10" data-notes="三区布局要配合截图或实际演示。左侧=导航、中间=对话、右侧=结果。">
+
+      <h1>界面布局总览</h1>
+
+      <div class="layout-overview">
+<div class="layout-zone layout-left">
+  <div class="layout-zone-header">📂 左侧导航栏</div>
+  <div class="layout-items">
+    <span>任务列表</span><span>工作空间</span><span>连接器</span><span>专家中心</span><span>技能市场</span>
+  </div>
+</div>
+<div class="layout-zone layout-center">
+  <div class="layout-zone-header">💬 中间对话区</div>
+  <div class="layout-items">
+    <span>输入需求</span><span>查看AI回复</span><span>文件上传</span><span>模型选择</span>
+  </div>
+</div>
+<div class="layout-zone layout-right">
+  <div class="layout-zone-header">📋 右侧结果区</div>
+  <div class="layout-items">
+    <span>文件预览</span><span>代码查看</span><span>图片展示</span><span>网页预览</span>
+  </div>
+</div>
+</div>
+
+      <div class="slide-num">11 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="11" data-notes="第3章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>左侧导航栏功能</h1>
+
+      <div class="nav-features">
+<div class="nav-feature">
+  <div class="nf-icon">📋</div>
+  <div class="nf-body">
+    <h3>任务列表</h3>
+    <p>查看所有进行中和已完成的任务，支持搜索、筛选和切换</p>
+  </div>
+</div>
+<div class="nav-feature">
+  <div class="nf-icon">📁</div>
+  <div class="nf-body">
+    <h3>工作空间</h3>
+    <p>管理不同的工作目录，每个任务可以指定独立的文件上下文</p>
+  </div>
+</div>
+<div class="nav-feature">
+  <div class="nf-icon">🔌</div>
+  <div class="nf-body">
+    <h3>连接器管理</h3>
+    <p>连接QQ邮箱、腾讯文档、GitHub等外部服务，扩展AI能力边界</p>
+  </div>
+</div>
+<div class="nav-feature">
+  <div class="nf-icon">👨‍💼</div>
+  <div class="nf-body">
+    <h3>专家中心</h3>
+    <p>浏览和召唤专业领域的AI专家顾问，获取资深从业者视角</p>
+  </div>
+</div>
+<div class="nav-feature">
+  <div class="nf-icon">🧩</div>
+  <div class="nf-body">
+    <h3>技能市场</h3>
+    <p>安装和管理技能插件，一键扩展AI的专业能力</p>
+  </div>
+</div>
+</div>
+
+      <div class="slide-num">12 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="12" data-notes="第3章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>中间对话区详解</h1>
+
+      <div class="content-card">
+<h2>对话区的核心元素</h2>
+</div>
+<div class="chat-features">
+<div class="chat-feature">
+  <h3>📝 输入框</h3>
+  <p>用自然语言描述您的需求，支持多行文本输入</p>
+  <code>可以拖拽文件到输入框，让AI直接处理</code>
+</div>
+<div class="chat-feature">
+  <h3>🤖 模型选择</h3>
+  <p>可选择不同的AI模型来执行任务，不同模型擅长不同领域</p>
+</div>
+<div class="chat-feature">
+  <h3>⚙️ 高级选项</h3>
+  <p>设置工作模式（Craft/Plan/Ask）、工作目录、附加上下文</p>
+</div>
+<div class="chat-feature">
+  <h3>📎 文件上传</h3>
+  <p>支持上传图片、文档、表格、代码等文件作为任务上下文</p>
+</div>
+</div>
+
+      <div class="slide-num">13 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="13" data-notes="第3章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>右侧结果区详解</h1>
+
+      <div class="result-features">
+<div class="result-feature">
+  <div class="rf-icon">📄</div>
+  <div class="rf-body">
+    <h3>文件预览</h3>
+    <p>生成的文档、表格、PPT等可直接在右侧预览查看</p>
+  </div>
+</div>
+<div class="result-feature">
+  <div class="rf-icon">💻</div>
+  <div class="rf-body">
+    <h3>代码查看</h3>
+    <p>AI生成的代码以语法高亮形式展示，支持复制和下载</p>
+  </div>
+</div>
+<div class="result-feature">
+  <div class="rf-icon">🖼️</div>
+  <div class="rf-body">
+    <h3>图片展示</h3>
+    <p>生成的图片、图表直接在右侧显示</p>
+  </div>
+</div>
+<div class="result-feature">
+  <div class="rf-icon">🌐</div>
+  <div class="rf-body">
+    <h3>网页预览</h3>
+    <p>HTML页面生成后可内嵌预览，所见即所得</p>
+  </div>
+</div>
+</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成「模块4 · 界面精通」中的4.1 三区功能识别</div>
+      <div class="slide-num">14 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="14" data-notes="第4章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">4</div>
+
+      <h2>远程控制Claw</h2>
+
+      <div class="intro-desc">解锁WorkBuddy的远程控制功能，实现用手机遥控电脑办公，随时随地处理工作。</div>
+
+      <div class="slide-num">15 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="15" data-notes="用&#x27;遥控器&#x27;类比最直观。强调支持微信/企微，不需要额外安装APP。">
+
+      <h1>什么是Claw</h1>
+
+      <div class="content-card concept-card">
+<div class="concept-highlight">核心概念</div>
+<h2>Claw = 手机遥控器</h2>
+<p>通过手机上的即时通讯软件（微信、企业微信、QQ、钉钉、飞书）远程控制电脑上的 WorkBuddy 执行任务。</p>
+</div>
+<div class="claw-flow">
+<div class="claw-node">📱 手机</div>
+<div class="claw-arrow">→ 发消息 →</div>
+<div class="claw-node">💬 IM软件</div>
+<div class="claw-arrow">→ 转发指令 →</div>
+<div class="claw-node">🖥️ WorkBuddy</div>
+<div class="claw-arrow">→ 返回结果 →</div>
+<div class="claw-node">📱 手机查看</div>
+</div>
+<div class="tip-box"><span class="tip-icon">🎯</span> 就像给电脑装了个"遥控器"，随时随地用手机指挥电脑干活！</div>
+
+      <div class="slide-num">16 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="16" data-notes="第4章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>支持的平台与场景</h1>
+
+      <div class="platform-grid">
+<div class="platform-card"><div class="platform-icon">💬</div><h3>微信</h3><p>在微信中发消息给Claw机器人即可远程控制</p></div>
+<div class="platform-card"><div class="platform-icon">🏢</div><h3>企业微信</h3><p>集成到企业微信工作台，团队协同更便捷</p></div>
+<div class="platform-card"><div class="platform-icon">🐧</div><h3>QQ</h3><p>通过QQ消息远程下达任务</p></div>
+<div class="platform-card"><div class="platform-icon">📌</div><h3>钉钉</h3><p>在钉钉中远程指挥电脑工作</p></div>
+<div class="platform-card"><div class="platform-icon">🕊️</div><h3>飞书</h3><p>飞书卡片消息交互，体验流畅</p></div>
+</div>
+<div class="scene-tags">
+  <span>💼 出差时处理紧急工作</span>
+  <span>🏠 在家遥控办公室电脑</span>
+  <span>📊 远程查看进度报告</span>
+  <span>⏰ 定时自动执行任务</span>
+</div>
+
+      <div class="slide-num">17 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="17" data-notes="现场演示扫码绑定过程。提醒需要电脑保持开机。">
+
+      <h1>Claw接入指南</h1>
+
+      <div class="steps-vertical">
+<div class="step-item">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h3>开启Claw服务</h3>
+    <p>在WorkBuddy设置中启用Claw远程控制功能</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h3>获取接入凭证</h3>
+    <p>系统生成唯一的接入码/二维码</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h3>扫码绑定IM</h3>
+    <p>在目标IM平台（微信/企微/QQ等）扫码完成绑定</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h3>开始远程控制</h3>
+    <p>在手机上发送指令，电脑端WorkBuddy自动执行</p>
+  </div>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">⚠️</span> 请确保电脑保持开机且网络通畅，远程控制才能生效</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成5.1 Claw接入 + 5.2 远程执行任务</div>
+      <div class="slide-num">18 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="18" data-notes="第5章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">5</div>
+
+      <h2>任务创建与管理</h2>
+
+      <div class="intro-desc">学习如何高效创建、描述和管理任务，让你与AI的协作更加精准顺畅。</div>
+
+      <div class="slide-num">19 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="19" data-notes="三个关键要素缺一不可。现场演示一个完整的任务创建过程。">
+
+      <h1>如何创建任务</h1>
+
+      <div class="content-card">
+<h2>一句话描述需求，三个关键要素</h2>
+</div>
+<div class="triple-cards">
+<div class="triple-card">
+  <div class="triple-num">①</div>
+  <h3>明确的目标</h3>
+  <p>告诉AI你要什么结果</p>
+  <code>"帮我生成一份销售分析报告"</code>
+</div>
+<div class="triple-card">
+  <div class="triple-num">②</div>
+  <h3>提供上下文</h3>
+  <p>上传文件或指定工作目录</p>
+  <code>拖拽Excel文件到输入框</code>
+</div>
+<div class="triple-card">
+  <div class="triple-num">③</div>
+  <h3>选择工作模式</h3>
+  <p>Craft/Plan/Ask 选最合适的</p>
+  <code>默认Craft直接执行</code>
+</div>
+</div>
+
+      <div class="slide-num">20 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="20" data-notes="第5章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>管理已有任务</h1>
+
+      <div class="task-mgmt-grid">
+<div class="mgmt-card">
+  <h3>📋 任务列表</h3>
+  <p>左侧导航栏查看所有任务，按时间排序</p>
+</div>
+<div class="mgmt-card">
+  <h3>🔍 搜索筛选</h3>
+  <p>按关键词搜索历史任务，快速定位</p>
+</div>
+<div class="mgmt-card">
+  <h3>🔄 继续对话</h3>
+  <p>点击已有任务继续对话，AI记得之前的上下文</p>
+</div>
+<div class="mgmt-card">
+  <h3>📊 任务状态</h3>
+  <p>进行中、已完成、已暂停三种状态清晰展示</p>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">💡</span> 可以同时发起多个任务，在不同任务间切换，互不影响</div>
+
+      <div class="slide-num">21 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="21" data-notes="这4个技巧能显著提升使用体验。可以分享自己的实际案例。">
+
+      <h1>高效对话技巧</h1>
+
+      <div class="tips-list">
+<div class="tip-card">
+  <div class="tip-num">🥇</div>
+  <div class="tip-body">
+    <h3>越具体越好</h3>
+    <p>不要说"帮我做报告"，要说"帮我生成2026年Q1华东区销售业绩报告，用表格对比去年同期数据"</p>
+  </div>
+</div>
+<div class="tip-card">
+  <div class="tip-num">🥈</div>
+  <div class="tip-body">
+    <h3>提供格式要求</h3>
+    <p>"用Markdown格式输出"、"表格用三列：项目名称、完成度、备注"</p>
+  </div>
+</div>
+<div class="tip-card">
+  <div class="tip-num">🥉</div>
+  <div class="tip-body">
+    <h3>分步验证</h3>
+    <p>复杂任务先让AI规划步骤，确认后再执行："先给我列出执行计划，我确认后再开始"</p>
+  </div>
+</div>
+<div class="tip-card">
+  <div class="tip-num">🏅</div>
+  <div class="tip-body">
+    <h3>及时纠偏</h3>
+    <p>AI走偏时直接说"不对，我要的是..."，AI会立即调整方向</p>
+  </div>
+</div>
+</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成「模块3 · 任务管理」练习（3.1-3.3）</div>
+      <div class="slide-num">22 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="22" data-notes="第6章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">6</div>
+
+      <h2>高级选项设置</h2>
+
+      <div class="intro-desc">深入探索任务的高级选项，包括工作模式、模型切换和技能调用，让AI更懂你。</div>
+
+      <div class="slide-num">23 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="23" data-notes="Craft适合80%日常场景，Plan适合复杂任务，Ask适合学习咨询。">
+
+      <h1>工作模式选择</h1>
+
+      <div class="mode-grid">
+<div class="mode-card mode-craft">
+  <div class="mode-icon">⚡</div>
+  <h3>Craft 模式</h3>
+  <p class="mode-desc">你说，我做</p>
+  <p>直接执行任务，适合明确需求</p>
+  <span class="mode-badge">默认推荐</span>
+</div>
+<div class="mode-card mode-plan">
+  <div class="mode-icon">📋</div>
+  <h3>Plan 模式</h3>
+  <p class="mode-desc">先思考，再执行</p>
+  <p>AI先生成方案供你审核，确认后执行</p>
+  <span class="mode-badge">复杂任务</span>
+</div>
+<div class="mode-card mode-ask">
+  <div class="mode-icon">💬</div>
+  <h3>Ask 模式</h3>
+  <p class="mode-desc">只聊，不动手</p>
+  <p>纯问答模式，不操作文件，适合咨询</p>
+  <span class="mode-badge">信息咨询</span>
+</div>
+</div>
+
+      <div class="slide-num">24 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="24" data-notes="第6章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>切换模型与技能</h1>
+
+      <div class="content-card">
+<h2>选择最适合的AI模型</h2>
+<p>不同模型在不同领域各有所长——有些擅长代码，有些擅长写作，有些推理能力更强</p>
+</div>
+<div class="model-tips">
+<div class="model-tip">
+  <h3>💻 编程任务</h3>
+  <p>选择擅长代码生成的模型</p>
+</div>
+<div class="model-tip">
+  <h3>📝 文档写作</h3>
+  <p>选择语言表达能力强的模型</p>
+</div>
+<div class="model-tip">
+  <h3>🧩 复杂推理</h3>
+  <p>选择逻辑推理能力强的模型</p>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">💡</span> 可以在任务执行中动态切换模型，无需重启任务</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成4.2三模式体验 + 4.3模式选择测试</div>
+      <div class="slide-num">25 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="25" data-notes="第6章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>设置工作目录</h1>
+
+      <div class="content-card">
+<h2>工作目录 = AI 的"办公桌"</h2>
+<p>设置工作目录后，WorkBuddy 可以：</p>
+</div>
+<div class="checklist">
+<div class="check-item">✅ 读取目录中的文件作为参考</div>
+<div class="check-item">✅ 在目录中创建和修改文件</div>
+<div class="check-item">✅ 批量处理目录中的文档</div>
+<div class="check-item">✅ 以目录为基础组织项目文件</div>
+</div>
+<div class="tip-box"><span class="tip-icon">🔒</span> AI只能访问你指定的工作目录，其他文件绝对安全</div>
+
+      <div class="slide-num">26 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="26" data-notes="第7章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">7</div>
+
+      <h2>专家中心</h2>
+
+      <div class="intro-desc">召唤专业领域的AI顾问，甚至组建专家团，以资深从业者的视角和方法论完成任务。</div>
+
+      <div class="slide-num">27 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="27" data-notes="专家团是WorkBuddy最独特的差异化能力。可以现场演示组建一个简单专家团。">
+
+      <h1>专家与专家团</h1>
+
+      <div class="content-card concept-card">
+<div class="concept-highlight">核心概念</div>
+<h2>专家 = 预配置的专业AI角色</h2>
+<p>每个专家拥有特定领域的知识体系、工作方法和输出标准</p>
+</div>
+<div class="expert-grid">
+<div class="expert-card"><div class="expert-icon">📊</div><h3>数据分析师</h3><p>专业数据处理与可视化</p></div>
+<div class="expert-card"><div class="expert-icon">💻</div><h3>软件工程师</h3><p>代码生成与架构设计</p></div>
+<div class="expert-card"><div class="expert-icon">📝</div><h3>文案策划</h3><p>营销文案与品牌策略</p></div>
+<div class="expert-card"><div class="expert-icon">🎨</div><h3>设计师</h3><p>UI设计与视觉创意</p></div>
+<div class="expert-card"><div class="expert-icon">👥</div><h3>HR专家</h3><p>招聘、薪酬与绩效管理</p></div>
+<div class="expert-card"><div class="expert-icon">📈</div><h3>商业分析师</h3><p>市场研究与战略分析</p></div>
+</div>
+
+      <div class="slide-num">28 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="28" data-notes="第7章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>操作流程</h1>
+
+      <div class="steps-horizontal">
+<div class="hs-item"><div class="hs-icon">1</div><p>打开专家中心</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">2</div><p>浏览/搜索专家</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">3</div><p>选择合适专家</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">4</div><p>开始专业对话</p></div>
+</div>
+<div class="content-card" style="margin-top:32px;">
+<h3>专家团：多专家协作</h3>
+<p>复杂项目可以组建专家团——例如做一个产品发布会PPT，可以同时调用"市场分析师+设计师+文案专家"协同完成</p>
+</div>
+<div class="tip-box"><span class="tip-icon">🔥</span> 这是WorkBuddy最核心的差异化能力之一：AI多角色协作！</div>
+
+      <div class="slide-num">29 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="29" data-notes="第7章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>Skill、专家与专家团</h1>
+
+      <div class="compare-triple">
+<div class="ct-card">
+  <div class="ct-icon">🧩</div>
+  <h3>Skill（技能）</h3>
+  <p>单一能力模块</p>
+  <ul>
+    <li>解决特定问题</li>
+    <li>像"工具"</li>
+    <li>可自由组合</li>
+  </ul>
+  <span class="ct-example">例：Excel处理、PDF转换</span>
+</div>
+<div class="ct-divider">
+  <div class="ct-arrow">⊂</div>
+</div>
+<div class="ct-card">
+  <div class="ct-icon">👨‍💼</div>
+  <h3>专家（Expert）</h3>
+  <p>完整角色体系</p>
+  <ul>
+    <li>专业领域知识</li>
+    <li>像"顾问"</li>
+    <li>含多个Skill</li>
+  </ul>
+  <span class="ct-example">例：HR专家含招聘+薪酬+绩效</span>
+</div>
+<div class="ct-divider">
+  <div class="ct-arrow">⊂</div>
+</div>
+<div class="ct-card">
+  <div class="ct-icon">🏢</div>
+  <h3>专家团（Team）</h3>
+  <p>多专家协作</p>
+  <ul>
+    <li>跨领域协同</li>
+    <li>像"团队"</li>
+    <li>含多个Expert</li>
+  </ul>
+  <span class="ct-example">例：产品团队含PM+设计师+工程师</span>
+</div>
+</div>
+
+      <div class="slide-num">30 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="30" data-notes="第8章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">8</div>
+
+      <h2>进阶配置体系</h2>
+
+      <div class="intro-desc">从“一次性助手”到“长期进化智能体”，系统学习WorkBuddy的深层配置架构。</div>
+
+      <div class="slide-num">31 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="31" data-notes="这是WorkBuddy与其他AI工具本质区别：不是一次性工具，而是持续成长的伙伴。">
+
+      <h1>从助手到智能体</h1>
+
+      <div class="evolution-path">
+<div class="evo-stage">
+  <div class="evo-circle">1.0</div>
+  <h3>一次性助手</h3>
+  <p>每次对话独立，不记忆偏好</p>
+  <span class="evo-tag">默认状态</span>
+</div>
+<div class="evo-arrow">→</div>
+<div class="evo-stage">
+  <div class="evo-circle evo-active">2.0</div>
+  <h3>个性化助手</h3>
+  <p>记住偏好和习惯，持续优化</p>
+  <span class="evo-tag">配置USER.md</span>
+</div>
+<div class="evo-arrow">→</div>
+<div class="evo-stage">
+  <div class="evo-circle">3.0</div>
+  <h3>智能体</h3>
+  <p>自主学习、进化、多角色协同</p>
+  <span class="evo-tag">完整配置体系</span>
+</div>
+</div>
+<div class="content-card" style="margin-top:32px;">
+<h3>关键转变</h3>
+<p>从<strong>"每次都要重新教AI"</strong> → <strong>"AI越用越懂你，长期积累进化"</strong></p>
+</div>
+
+      <div class="slide-num">32 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="32" data-notes="第8章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>能力层设计模式</h1>
+
+      <div class="layer-diagram">
+<div class="layer-card layer-1">
+  <h3>🎯 角色层 (SOUL.md)</h3>
+  <p>定义AI的身份、性格、说话方式</p>
+</div>
+<div class="layer-card layer-2">
+  <h3>🧠 知识层 (RAG)</h3>
+  <p>专业领域的知识库和经验积累</p>
+</div>
+<div class="layer-card layer-3">
+  <h3>🛠️ 能力层 (Skills)</h3>
+  <p>具体可调用的技能和工具</p>
+</div>
+<div class="layer-card layer-4">
+  <h3>💾 记忆层 (Memory)</h3>
+  <p>对话历史、用户偏好、项目背景</p>
+</div>
+<div class="layer-card layer-5">
+  <h3>🔌 连接层 (Connectors)</h3>
+  <p>与外部系统（邮箱、文档、GitHub等）的桥梁</p>
+</div>
+</div>
+
+      <div class="slide-num">33 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="33" data-notes="第9章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">9</div>
+
+      <h2>角色定义</h2>
+
+      <div class="intro-desc">打造专属AI的灵魂、身份和记忆，让WorkBuddy既懂你又记得你的习惯。</div>
+
+      <div class="slide-num">34 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="34" data-notes="第9章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>角色设定的意义</h1>
+
+      <div class="content-card concept-card">
+<div class="concept-highlight">为什么需要角色设定？</div>
+<h2>让AI拥有"职业身份"</h2>
+<p>就像招聘时看岗位说明书——角色设定告诉AI：你是谁、你擅长什么、你应该怎样工作</p>
+</div>
+<div class="benefit-grid">
+<div class="benefit-card">
+  <h3>🎯 输出更专业</h3>
+  <p>以专家视角而非通才视角回答问题</p>
+</div>
+<div class="benefit-card">
+  <h3>🔄 风格一致</h3>
+  <p>每次回答保持统一的人设和语气</p>
+</div>
+<div class="benefit-card">
+  <h3>⚡ 减少纠偏</h3>
+  <p>不需要每次都"重新教"AI该怎么做</p>
+</div>
+<div class="benefit-card">
+  <h3>🚀 效率提升</h3>
+  <p>AI自动按照专业标准输出，减少往返修改</p>
+</div>
+</div>
+
+      <div class="slide-num">35 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="35" data-notes="四个文件各有分工。USER.md定义你，SOUL.md定义AI，MEMORY.md记录偏好，RAG积累知识。">
+
+      <h1>核心配置文件详解</h1>
+
+      <div class="config-files">
+<div class="config-file">
+  <div class="cf-header">
+    <h3>USER.md</h3>
+    <span class="cf-badge">你是谁</span>
+  </div>
+  <p>定义用户身份：姓名、职位、背景、工作偏好、沟通风格</p>
+  <code>位置：~/.workbuddy/USER.md</code>
+</div>
+<div class="config-file">
+  <div class="cf-header">
+    <h3>Identity.md</h3>
+    <span class="cf-badge">AI 的身份</span>
+  </div>
+  <p>定义 AI 身份标识：名字、emoji、角色</p>
+  <code>位置：项目/.workbuddy/Identity.md</code>
+</div>
+<div class="config-file">
+  <div class="cf-header">
+    <h3>SOUL.md</h3>
+    <span class="cf-badge">AI的灵魂</span>
+  </div>
+  <p>定义AI角色：身份、能力、性情、工作方式、边界原则</p>
+  <code>位置：项目/.workbuddy/SOUL.md</code>
+</div>
+<div class="config-file">
+  <div class="cf-header">
+    <h3>MEMORY.md</h3>
+    <span class="cf-badge">长期记忆</span>
+  </div>
+  <p>记录项目背景、用户偏好、重要决策和历史</p>
+  <code>位置：~/.workbuddy/MEMORY.md</code>
+</div>
+<div class="config-file">
+  <div class="cf-header">
+    <h3>RAG</h3>
+    <span class="cf-badge">知识库</span>
+  </div>
+  <p>专业领域的结构化知识，支持持续积累和跨角色共享</p>
+  <code>位置：项目/.workbuddy/RAG</code>
+</div>
+</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，先完成6.1 AB对比测试（配置前基线）</div>
+      <div class="slide-num">36 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="36" data-notes="第9章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>创建你的第一个角色</h1>
+
+      <div class="steps-vertical">
+<div class="step-item">
+  <div class="step-num">1</div>
+  <div class="step-content">
+    <h3>确定角色定位</h3>
+    <p>"我需要一个什么样的AI助手？"——数据分析师？文案专家？HR顾问？</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">2</div>
+  <div class="step-content">
+    <h3>编写 USER.md</h3>
+    <p>描述你自己：职位、背景、工作偏好、沟通习惯</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">3</div>
+  <div class="step-content">
+    <h3>编写 SOUL.md</h3>
+    <p>定义AI角色：专业领域、工作方式、输出标准、语言风格</p>
+  </div>
+</div>
+<div class="step-item">
+  <div class="step-num">4</div>
+  <div class="step-content">
+    <h3>测试迭代</h3>
+    <p>开始对话，观察AI表现，持续优化配置文件</p>
+  </div>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">📝</span> 可以直接说"帮我写一份XXX角色的SOUL.md"，AI会帮你生成！</div>
+
+      <div class="slide-num">37 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="37" data-notes="第9章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>记忆持久化层</h1>
+
+      <div class="terminal-block" style="margin:16px auto 24px; max-width:620px;">
+        <pre><code>Layer 3: 记忆持久化层
+─── memory/*.md | MEMORY.md | RAG知识库文档
+→ 短期记录 + 长期总结 + 专业资料</code></pre>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+
+<div class="content-card" style="margin:0;">
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+    <span style="font-size:24px;">📝</span>
+    <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin:0;">短期记忆 memory/*.md</h3>
+  </div>
+  <p style="font-size:13px; color:#475569; line-height:1.8; margin-bottom:10px;">按日期自动归档的每日工作日志，记录当天实质性工作内容。</p>
+  <div style="background:#f8fafc; border-radius:8px; padding:10px 14px; font-size:12px; color:#64748b;">
+    <code>项目/.workbuddy/memory/2026-05-27.md</code><br>
+    <code>项目/.workbuddy/memory/2026-05-28.md</code><br>
+    ⏱ 追加模式，不覆盖，不删除
+  </div>
+</div>
+
+<div class="content-card" style="margin:0;">
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+    <span style="font-size:24px;">📌</span>
+    <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin:0;">长期记忆 MEMORY.md</h3>
+  </div>
+  <p style="font-size:13px; color:#475569; line-height:1.8; margin-bottom:10px;">跨会话持久化的精简笔记，记录用户偏好、技术决策和重要约定。</p>
+  <div style="background:#f8fafc; border-radius:8px; padding:10px 14px; font-size:12px; color:#64748b;">
+    <code>项目/.workbuddy/memory/MEMORY.md</code><br>
+     3000字符限制/会话<br>
+    📋 定期提炼，删除过期内容
+  </div>
+</div>
+
+<div class="content-card" style="margin:0;">
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+    <span style="font-size:24px;">📚</span>
+    <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin:0;">RAG 知识库文档</h3>
+  </div>
+  <p style="font-size:13px; color:#475569; line-height:1.8; margin-bottom:10px;">专业领域的结构化知识，支持持续积累和跨角色知识共享。</p>
+  <div style="background:#f8fafc; border-radius:8px; padding:10px 14px; font-size:12px; color:#64748b;">
+    <code>项目/.workbuddy/RAG/</code><br>
+    📂 结构化目录组织<br>
+    🔄 跨角色共享更新
+  </div>
+</div>
+
+      </div>
+
+      <div class="tip-box" style="margin-top:20px;"><span class="tip-icon">💡</span> 记忆层协作流程：每日工作自动写入短期日志 → 每30天提炼为长期记忆 → 专业知识沉淀至 RAG 知识库</div>
+
+      <div class="slide-num">38 / 46</div>
+
+    
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✟️ 打开练习包，完成6.2-6.3配置SOUL+IDENTITY+USER，再回到6.1对比</div>
+      </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="38" data-notes="第10章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">10</div>
+
+      <h2>能力深化与探索</h2>
+
+      <div class="intro-desc">学习如何通过技能市场扩展AI能力，并通过“探索”功能一键复刻优秀案例。</div>
+
+      <div class="slide-num">39 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="39" data-notes="提醒安全审核机制。建议从1-2个最需要的技能开始安装。">
+
+      <h1>技能市场操作指南</h1>
+
+      <div class="content-card">
+<h2>技能市场 = AI的"应用商店"</h2>
+<p>安装技能就像给手机装App——一键扩展WorkBuddy的专业能力</p>
+</div>
+<div class="skill-shop-steps">
+<div class="skill-step">
+  <div class="ss-num">🔍</div>
+  <h3>浏览/搜索</h3>
+  <p>在技能市场按分类浏览或关键词搜索</p>
+</div>
+<div class="skill-step">
+  <div class="ss-num">📋</div>
+  <h3>查看详情</h3>
+  <p>了解技能的功能、适用场景和使用方法</p>
+</div>
+<div class="skill-step">
+  <div class="ss-num">⬇️</div>
+  <h3>一键安装</h3>
+  <p>点击安装，技能即刻可用（安全审核自动进行）</p>
+</div>
+<div class="skill-step">
+  <div class="ss-num">⚡</div>
+  <h3>开始使用</h3>
+  <p>在对话中AI会自动调用相关技能</p>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">🛡️</span> 所有技能安装前自动进行安全审核，确保来源可靠</div>
+
+      <div class="slide-num">40 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="40" data-notes="第10章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>探索功能详解</h1>
+
+      <div class="content-card concept-card">
+<div class="concept-highlight">核心功能</div>
+<h2>"探索" = 灵感源泉</h2>
+<p>浏览社区用户分享的优秀案例，一键复刻到自己的项目中</p>
+</div>
+<div class="explore-features">
+<div class="explore-feat">
+  <h3>🌟 案例库</h3>
+  <p>丰富的真实用户案例，覆盖各类场景</p>
+</div>
+<div class="explore-feat">
+  <h3>🔄 一键复刻</h3>
+  <p>看到好的用法，直接复制配置到自己的项目</p>
+</div>
+<div class="explore-feat">
+  <h3>🏷️ 分类筛选</h3>
+  <p>按行业、场景、难度等筛选最适合的案例</p>
+</div>
+<div class="explore-feat">
+  <h3>💡 灵感激发</h3>
+  <p>发现WorkBuddy的新用法，拓展想象力边界</p>
+</div>
+</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成7.1 安装一个技能</div>
+      <div class="slide-num">41 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-chapter-intro" data-page="41" data-notes="第11章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <div class="chapter-num-display">11</div>
+
+      <h2>连接器与自动化</h2>
+
+      <div class="intro-desc">学习如何连接外部服务，以及设置定时任务，让AI自动执行重复性工作。</div>
+
+      <div class="slide-num">42 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="42" data-notes="根据团队实际使用的工具，重点介绍相关的连接器。">
+
+      <h1>连接器全景概览</h1>
+
+      <div class="connector-overview">
+<div class="connector-card"><div class="cc-icon">📧</div><h3>QQ邮箱</h3><p>收发邮件、搜索、起草回复</p><span class="cc-status connected">已连接</span></div>
+<div class="connector-card"><div class="cc-icon">📄</div><h3>腾讯文档</h3><p>读写云端Word/Excel/PPT</p><span class="cc-status connected">已连接</span></div>
+<div class="connector-card"><div class="cc-icon">🐙</div><h3>GitHub</h3><p>代码仓库、Issue、PR管理</p><span class="cc-status">需配置</span></div>
+<div class="connector-card"><div class="cc-icon">🌐</div><h3>EdgeOne Pages</h3><p>静态网站一键部署</p><span class="cc-status connected">已连接</span></div>
+<div class="connector-card"><div class="cc-icon">📋</div><h3>TAPD</h3><p>敏捷项目管理</p><span class="cc-status">需配置</span></div>
+<div class="connector-card"><div class="cc-icon">🎥</div><h3>腾讯会议</h3><p>创建会议、录制管理</p><span class="cc-status connected">已连接</span></div>
+<div class="connector-card"><div class="cc-icon">📌</div><h3>钉钉</h3><p>消息、群聊、考勤</p><span class="cc-status">需配置</span></div>
+<div class="connector-card"><div class="cc-icon">📚</div><h3>IMA知识库</h3><p>知识库搜索与管理</p><span class="cc-status connected">已连接</span></div>
+</div>
+
+      <div class="slide-num">43 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="43" data-notes="第11章的这部分内容，建议配合实际操作演示。注意观察听众的反应，及时调整节奏。">
+
+      <h1>连接器操作指南</h1>
+
+      <div class="content-card">
+<h2>统一连接流程</h2>
+</div>
+<div class="steps-horizontal">
+<div class="hs-item"><div class="hs-icon">1</div><p>打开侧边栏</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">2</div><p>连接器管理</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">+</div><p>添加服务</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">🔑</div><p>扫码授权</p></div>
+<div class="hs-arrow">→</div>
+<div class="hs-item"><div class="hs-icon">✓</div><p>连接成功</p></div>
+</div>
+<div class="content-card" style="margin-top:32px;">
+<h3>授权类型说明</h3>
+<div class="auth-types">
+<div><strong>OAuth 扫码</strong>：QQ邮箱、腾讯文档、腾讯会议 — 最安全，推荐</div>
+<div><strong>API Token</strong>：GitHub、TAPD — 在对应平台生成后填入</div>
+<div><strong>CLI 登录</strong>：EdgeOne Pages、钉钉 — 命令行一次认证</div>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">🔒</span> 所有连接器的授权凭证加密存储，可随时撤销</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成7.2 连接一个外部服务</div>
+      <div class="slide-num">44 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-content" data-page="44" data-notes="这是&#x27;效率倍增器&#x27;。从一个简单定时任务开始尝试，逐步建立自动化体系。">
+
+      <h1>自动化任务编排</h1>
+
+      <div class="content-card concept-card">
+<div class="concept-highlight">解放重复劳动</div>
+<h2>让AI按计划自动工作</h2>
+<p>设置定时触发器，WorkBuddy在指定时间自动执行任务</p>
+</div>
+<div class="auto-examples">
+<div class="auto-example">
+  <div class="ae-icon">📊</div>
+  <div class="ae-body">
+    <h3>每日数据汇总</h3>
+    <p>每天早上9点，自动从数据库提取昨日数据并生成日报</p>
+    <code>RRULE: FREQ=DAILY;BYHOUR=9</code>
+  </div>
+</div>
+<div class="auto-example">
+  <div class="ae-icon">📧</div>
+  <div class="ae-body">
+    <h3>每周报告发送</h3>
+    <p>每周一早上自动生成周报并通过邮件发送</p>
+    <code>RRULE: FREQ=WEEKLY;BYDAY=MO;BYHOUR=8</code>
+  </div>
+</div>
+<div class="auto-example">
+  <div class="ae-icon">📋</div>
+  <div class="ae-body">
+    <h3>月末薪资核算</h3>
+    <p>每月最后一个工作日自动执行薪资计算</p>
+    <code>RRULE: FREQ=MONTHLY;BYMONTHDAY=-1</code>
+  </div>
+</div>
+</div>
+<div class="tip-box"><span class="tip-icon">🎯</span> 一句话设置："每天早上9点自动帮我做XXX"</div>
+
+      
+      <div style="margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;color:#dc2626">✏️ 打开练习包，完成7.3 创建第一个自动化任务</div>
+      <div class="slide-num">45 / 46</div>
+
+    </div>
+
+    <div class="ppt-slide slide-ending" data-page="45" data-notes="">
+
+      <div class="ending-content">
+<h2>WorkBuddy — 你的专属智能工作伙伴</h2>
+<p>从今天起，让AI成为你最得力的工作搭档</p>
+<div class="ending-actions">
+  <div class="ending-action">📖 开始你的第一个任务</div>
+  <div class="ending-action">🔧 配置你的角色设定</div>
+  <div class="ending-action">🧩 探索技能市场</div>
+  <div class="ending-action">🔌 连接你的工具链</div>
+</div>
+<div class="ending-footer">AIGC工坊 · 2026.05.28 · workbuddy.tencent.com</div>
+</div>
+
+      <div class="slide-num">46 / 46</div>
+
+    </div>
+
+  </div>
+
+  <div class="ppt-bottombar" id="pptBottombar">
+    <button class="ppt-btn" id="homeBtn" onclick="goToPage(0)" title="回到首页">⟲ 首页</button>
+    <button class="ppt-btn" id="prevBtn" onclick="prevPage()">← 上页</button>
+    <div class="page-jump">
+      <input type="number" id="pageJumpInput" min="1" max="46" value="1" onkeydown="if(event.key==='Enter')jumpToPage()" title="输入页码后按回车跳转">
+      <span>/ 46</span>
+      <button class="ppt-btn" onclick="jumpToPage()" style="padding:4px 10px;font-size:12px;" title="跳转到输入页码">GO</button>
+    </div>
+    <button class="ppt-btn primary" id="nextBtn" onclick="nextPage()">下页 →</button>
+    <button <div class="kbd-hint" style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto"><span class="kbd" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;font-size:10px">←</span><span style="color:#94a3b8">/</span><span class="kbd" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;font-size:10px">→</span><span style="color:#94a3b8"> 翻页</span><span class="kbd" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;font-size:10px">F</span><span style="color:#94a3b8"> 全屏</span><span class="kbd" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;font-size:10px">Esc</span><span style="color:#94a3b8"> 退出</span></div>class="ppt-btn" id="endBtn" onclick="goToPage(45)" title="跳到末页">末页 ⟳</button>
+  </div>
+
+</div>
+
+<div class="presenter-overlay" id="presenterOverlay">
+  <div class="presenter-timer-bar">
+    <span style="font-size:14px;color:#94a3b8">🎤 演讲模式</span>
+    <span class="timer-display" id="presenterTimer">00:00</span>
+    <div class="timer-actions">
+      <button class="ppt-btn" onclick="startStopTimer()">⏯️</button>
+      <button class="ppt-btn" onclick="resetTimer()">🔄</button>
+      <button class="ppt-btn" onclick="togglePresenter()">✕ 退出</button>
+    </div>
+  </div>
+  <div class="presenter-notes" id="presenterNotes" style="background:#1e293b;color:#e2e8f0;padding:10px 16px;font-size:13px;line-height:1.6;border-top:1px solid #334155;min-height:40px;flex-shrink:0"><div style="display:flex;gap:8px;align-items:flex-start"><span style="color:#818cf8;font-weight:600;flex-shrink:0">📋 讲稿</span><span id="presenterNotesText" style="color:#cbd5e1">暂无备注</span></div></div>
+  <div class="presenter-slide-area" id="presenterSlideArea">
+  </div>
+  <div class="presenter-click-hint" id="presenterClickHint">
+    <span class="mouse-btn"><span class="mouse-icon">🖱️</span> 左键 = 下一页</span>
+    <span class="mouse-btn"><span class="mouse-icon">🖱️</span> 右键 = 上一页</span>
+  </div>
+  <div class="presenter-nav-bar">
+    <button class="ppt-btn" onclick="goToPage(0)" title="回到首页">⟲ 首页</button>
+    <button class="ppt-btn" id="presenterPrevBtn" onclick="presenterPrev()">← 上页</button>
+    <span class="page-indicator" id="presenterPageIndicator">1 / 46</span>
+    <button class="ppt-btn primary" id="presenterNextBtn" onclick="presenterNext()">下页 →</button>
+    <button class="ppt-btn" onclick="goToPage(45)" title="跳到末页">末页 ⟳</button>
+  </div>
+</div>
+
+<script>
+// ===== State =====
+let currentPage = 0;
+const totalPages = 46;
+const slides = document.querySelectorAll('.ppt-slide');
+const progressBar = document.getElementById('progressBar');
+const pageIndicator = document.getElementById('pageIndicator');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+let timerInterval = null;
+let timerSeconds = 0;
+
+// ===== Navigation =====
+function showPage(idx, dir) {
+  if (idx < 0 || idx >= totalPages || idx === currentPage) return;
+  
+  const cur = slides[currentPage];
+  const nxt = slides[idx];
+  const isNext = idx > currentPage;
+  
+  nxt.classList.remove('active', 'push-out', 'push-in', 'pull-out', 'pull-in');
+  void nxt.offsetHeight;
+  
+  if (isNext) {
+    cur.classList.remove('active');
+    cur.classList.add('push-out');
+    nxt.classList.add('push-in');
+  } else {
+    cur.classList.remove('active');
+    cur.classList.add('pull-out');
+    nxt.classList.add('pull-in');
+  }
+  
+  nxt.classList.add('active');
+  currentPage = idx;
+  updateUI();
+  
+  setTimeout(() => {
+    cur.classList.remove('push-out', 'pull-out');
+    nxt.classList.remove('push-in', 'pull-in');
+  }, 550);
+}
+
+function goToPage(idx) {
+  if (idx < 0 || idx >= totalPages) return;
+  if (idx === currentPage) return;
+  showPage(idx, idx > currentPage ? 'next' : 'prev');
+}
+
+function nextPage() { if (currentPage < totalPages - 1) showPage(currentPage + 1, 'next'); }
+function prevPage() { if (currentPage > 0) showPage(currentPage - 1, 'prev'); }
+
+function updateUI() {
+  pageIndicator.textContent = (currentPage + 1) + ' / ' + totalPages;
+  prevBtn.disabled = currentPage === 0;
+  nextBtn.disabled = currentPage === totalPages - 1;
+  
+  // Home and End buttons
+  const homeBtn = document.getElementById('homeBtn');
+  const endBtn = document.getElementById('endBtn');
+  if (homeBtn) homeBtn.disabled = currentPage === 0;
+  if (endBtn) endBtn.disabled = currentPage === totalPages - 1;
+  
+  progressBar.style.width = ((currentPage + 1) / totalPages * 100) + '%';
+  
+  // Update page jump input
+  const jumpInput = document.getElementById('pageJumpInput');
+  if (jumpInput) jumpInput.value = currentPage + 1;
+  
+  // Update TOC active
+  document.querySelectorAll('.toc-dropdown a').forEach((el, i) => {
+    el.classList.toggle('active-toc', i === currentPage);
+  });
+  
+  slides[currentPage].scrollTop = 0;
+}
+
+// ===== Page Jump =====
+function jumpToPage() {
+  const input = document.getElementById('pageJumpInput');
+  const num = parseInt(input.value, 10);
+  if (isNaN(num) || num < 1 || num > totalPages) {
+    input.value = currentPage + 1;
+    return;
+  }
+  goToPage(num - 1);
+}
+
+// ===== Keyboard =====
+document.addEventListener('keydown', function(e) {
+  const presenterOpen = document.getElementById('presenterOverlay').classList.contains('show');
+  
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    if (presenterOpen) presenterNext();
+    else nextPage();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (presenterOpen) presenterPrev();
+    else prevPage();
+  } else if (e.key === 'f' || e.key === 'F') {
+    if (!presenterOpen) toggleFullscreen();
+  } else if (e.key === 'Escape') {
+    if (presenterOpen) togglePresenter();
+  }
+});
+
+// ===== Fullscreen =====
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+// ===== TOC Dropdown =====
+function toggleToc() {
+  document.getElementById('tocDropdown').classList.toggle('show');
+}
+
+// ===== Presenter Mode (Fullscreen Minimal) =====
+function togglePresenter() {
+  const overlay = document.getElementById('presenterOverlay');
+  const show = !overlay.classList.contains('show');
+  
+  if (show) {
+    // Enter fullscreen + presenter
+    overlay.classList.add('show');
+    moveSlidesToPresenter();
+    startTimer();
+    updatePresenterUI();
+    resetClickHint();
+    
+    // Request fullscreen
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  } else {
+    // Exit
+    overlay.classList.remove('show');
+    moveSlidesBack();
+    stopTimer();
+    
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+}
+
+// Move slides between main area and presenter area
+const slideArea = document.getElementById('slideArea');
+
+function moveSlidesToPresenter() {
+  const presArea = document.getElementById('presenterSlideArea');
+  presArea.innerHTML = '';
+  slides.forEach(s => {
+    // Reset transforms for direct display
+    s.style.transform = '';
+    s.style.opacity = '1';
+    s.style.position = '';
+    s.style.top = '';
+    s.style.left = '';
+    s.style.right = '';
+    s.style.bottom = '';
+    presArea.appendChild(s);
+  });
+  slides[currentPage].classList.add('active');
+}
+
+function moveSlidesBack() {
+  slideArea.innerHTML = '';
+  slides.forEach(s => {
+    s.classList.remove('active');
+    s.style.transform = '';
+    s.style.opacity = '';
+    s.style.position = '';
+    slideArea.appendChild(s);
+  });
+  slides[currentPage].classList.add('active');
+  updateUI();
+}
+
+function updatePresenterUI() {
+  document.getElementById('presenterPageIndicator').textContent = (currentPage + 1) + ' / ' + totalPages;
+}
+
+function presenterNext() {
+  if (currentPage < totalPages - 1) {
+    slides[currentPage].classList.remove('active');
+    currentPage++;
+    slides[currentPage].classList.add('active');
+    updatePresenterUI();
+    updateUI();
+    resetClickHint();
+  }
+}
+
+function presenterPrev() {
+  if (currentPage > 0) {
+    slides[currentPage].classList.remove('active');
+    currentPage--;
+    slides[currentPage].classList.add('active');
+    updatePresenterUI();
+    updateUI();
+    resetClickHint();
+  }
+}
+
+// ===== Mouse click for presenter =====
+document.addEventListener('mousedown', function(e) {
+  const overlay = document.getElementById('presenterOverlay');
+  if (!overlay.classList.contains('show')) return;
+  
+  // Don't intercept button clicks
+  if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+  
+  e.preventDefault();
+  if (e.button === 0) {
+    // Left click = next page
+    presenterNext();
+  } else if (e.button === 2) {
+    // Right click = prev page
+    presenterPrev();
+  }
+});
+
+document.addEventListener('contextmenu', function(e) {
+  const overlay = document.getElementById('presenterOverlay');
+  if (overlay.classList.contains('show')) {
+    e.preventDefault();
+  }
+});
+
+// ===== Click hint auto-fade =====
+let clickHintTimer = null;
+
+function resetClickHint() {
+  const hint = document.getElementById('presenterClickHint');
+  if (!hint) return;
+  hint.classList.remove('fading');
+  hint.style.opacity = '1';
+  
+  if (clickHintTimer) clearTimeout(clickHintTimer);
+  clickHintTimer = setTimeout(() => {
+    hint.classList.add('fading');
+  }, 5000);
+}
+
+// ===== Timer =====
+function startStopTimer() {
+  if (timerInterval) { stopTimer(); return; }
+  startTimer();
+}
+function startTimer() {
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    const m = Math.floor(timerSeconds / 60);
+    const s = timerSeconds % 60;
+    document.getElementById('presenterTimer').textContent = 
+      String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+function resetTimer() {
+  stopTimer();
+  timerSeconds = 0;
+  document.getElementById('presenterTimer').textContent = '00:00';
+}
+
+// ===== Touch support =====
+let touchStartX = 0;
+let touchEndX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextPage();
+    else prevPage();
+  }
+});
+
+// ===== Init =====
+updateUI();
+</script>
+</body>
+</html>
