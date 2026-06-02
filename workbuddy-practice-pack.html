@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>WorkBuddy 实操练习包</title>
+<style>
+:root {
+  --primary: #4f46e5; --primary-light: #818cf8; --primary-dark: #3730a3;
+  --bg: #f8fafc; --surface: #ffffff; --text: #1e293b;
+  --text-secondary: #64748b; --border: #e2e8f0; --radius: 12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;padding-bottom:80px}
+/* Header */
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1e3a8a,#4f46e5);color:#fff;padding:16px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.header h1{font-size:18px;font-weight:700;margin-bottom:4px}
+.header .sub{font-size:12px;opacity:.85}
+.header .meta{font-size:11px;opacity:.7;margin-top:4px}
+/* Tabs */
+.tabs{display:flex;gap:6px;padding:12px 12px 0;overflow-x:auto;scrollbar-width:none;white-space:nowrap;position:sticky;top:56px;z-index:99;background:var(--bg)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text-secondary);transition:all .2s;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* Content */
+.content{max-width:640px;margin:0 auto;padding:12px}
+.section{display:none;background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.section.active{display:block}
+.section h2{font-size:17px;font-weight:700;color:var(--primary);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #eef2ff}
+.section h3{font-size:15px;font-weight:600;color:var(--primary-dark);margin:14px 0 8px}
+.section p{margin:8px 0;font-size:14px}
+/* Card */
+.card{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0;background:#fafbff}
+.card-title{font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px}
+/* Exercise Tags */
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-right:4px}
+.tag-basic{background:#dbeafe;color:#1d4ed8}
+.tag-adv{background:#fef3c7;color:#92400e}
+.tag-home{background:#d1fae5;color:#065f46}
+.tag-fire{background:#fee2e2;color:#991b1b}
+/* Steps */
+ol.steps{counter-reset:step;padding:0}
+.steps li{counter-increment:step;padding:8px 0 8px 36px;position:relative;font-size:14px;border-bottom:1px dashed var(--border);list-style:none}
+.steps li:last-child{border-bottom:none}
+.steps li::before{content:counter(step);position:absolute;left:0;top:8px;width:24px;height:24px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+/* Checkboxes */
+.cl{list-style:none;padding:0}
+.cl li{padding:5px 0;font-size:14px;display:flex;align-items:flex-start;gap:8px}
+.cl li::before{content:"□";color:var(--text-secondary);font-size:16px;flex-shrink:0}
+/* Code */
+code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:13px;color:#e11d48;font-family:monospace}
+pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;overflow-x:auto;margin:10px 0;font-size:13px;line-height:1.5}
+pre code{background:none;color:#e2e8f0;padding:0}
+/* Blank lines */
+.blank{display:block;border-bottom:1.5px dashed var(--border);margin:4px 0;height:28px}
+/* Table */
+.tb-wrap{overflow-x:auto;margin:10px 0;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:8px 10px;text-align:left;font-weight:600;background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:var(--primary);border-bottom:1px solid var(--border)}
+td{padding:7px 10px;border-top:1px solid var(--border)}
+tr:nth-child(even){background:#f8fafc}
+/* Tip */
+.tip{background:linear-gradient(135deg,#fefce8,#fffbeb);border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:14px}
+.tip strong{color:#92400e}
+/* Answer */
+details{border:1px solid var(--border);border-radius:8px;margin:8px 0;overflow:hidden}
+details summary{padding:10px 14px;cursor:pointer;font-weight:500;font-size:14px;color:var(--primary);background:#fafbff}
+details[open] summary{border-bottom:1px solid var(--border)}
+details .db{padding:10px 14px;font-size:14px}
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 4px;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;padding:6px 8px;cursor:pointer;color:var(--text-secondary);font-size:10px;border-radius:8px;min-width:52px}
+.nav-btn .icon{font-size:18px}
+.nav-btn.active{color:var(--primary);background:#eef2ff}
+/* Level indicator */
+.level{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+@media(max-width:480px){
+  .header{padding:12px}
+  .header h1{font-size:16px}
+  .content{padding:8px}
+  .section{padding:12px}
+  table{font-size:12px}
+  th,td{padding:5px 8px}
+}
+
+/* ====== PC Mode Toggle ====== */
+.view-toggle{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);
+  color:#fff;padding:6px 14px;border-radius:20px;cursor:pointer;
+  font-size:12px;font-weight:500;transition:all .2s;margin-left:auto;
+}
+.view-toggle:hover{background:rgba(255,255,255,0.25)}
+.view-toggle .icon{font-size:14px}
+
+/* PC Mode Overrides */
+.pc-mode{padding-bottom:20px !important}
+.pc-mode .content{max-width:100% !important;padding:16px 24px}
+.pc-mode .tabs{display:none !important}
+.pc-mode .bottom-nav{display:none !important}
+.pc-mode .section{display:block !important;max-width:960px;margin:0 auto 16px}
+.pc-mode .tab,.pc-mode .nav-btn{display:none !important}
+
+/* PC mode: tab-like section header bar */
+.pc-section-bar{display:none}
+.pc-mode .pc-section-bar{display:flex !important;gap:8px;padding:12px 24px;overflow-x:auto;position:sticky;top:56px;z-index:99;background:var(--bg);border-bottom:1px solid var(--border)}
+.pc-section-bar a{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;text-decoration:none;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);white-space:nowrap;transition:all .15s}
+.pc-section-bar a:hover{color:var(--primary);border-color:var(--primary-light);background:#eef2ff}
+
+/* PC mode: wider section card */
+.pc-mode .section{border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.pc-mode .section h2{font-size:18px}
+</style>
+</head>
+<body>
+
+<div class="header" style="display:flex;flex-direction:column;align-items:center;gap:4px">
+  <div style="display:flex;align-items:center;width:100%;justify-content:center;position:relative">
+    <div style="flex:1;text-align:center">
+      <h1>📋 WorkBuddy 实操练习包</h1>
+      <div class="sub">15个练习 + 3个综合实战 · 课堂跟练 + 课后自练</div>
+      <div class="meta">v1.0 · 2026-06-02</div>
+    </div>
+    <button class="view-toggle" id="viewToggle" onclick="toggleView()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%)" title="切换PC/手机阅览模式">
+      <span class="icon" id="toggleIcon">🖥️</span> <span id="toggleLabel">PC</span>
+    </button>
+  </div>
+</div>
+
+<!-- PC mode section bar -->
+<div class="pc-section-bar" id="pcSectionBar">
+  <a href="#sec-info">📌说明</a><a href="#sec-m1">模块1</a><a href="#sec-m2">模块2</a>
+  <a href="#sec-m3">模块3</a><a href="#sec-m4">模块4</a><a href="#sec-m5">模块5</a>
+  <a href="#sec-m6">模块6</a><a href="#sec-m7">模块7</a><a href="#sec-final">🔥实战</a><a href="#sec-data">📄配置</a>
+</div>
+
+<div class="tabs" id="tabs">
+  <span class="tab active" onclick="switchTab('info')">📌 说明</span>
+  <span class="tab" onclick="switchTab('m1')">模块1</span>
+  <span class="tab" onclick="switchTab('m2')">模块2</span>
+  <span class="tab" onclick="switchTab('m3')">模块3</span>
+  <span class="tab" onclick="switchTab('m4')">模块4</span>
+  <span class="tab" onclick="switchTab('m5')">模块5</span>
+  <span class="tab" onclick="switchTab('m6')">模块6</span>
+  <span class="tab" onclick="switchTab('m7')">模块7</span>
+  <span class="tab" onclick="switchTab('final')">🔥 实战</span>
+  <span class="tab" onclick="switchTab('data')">📄 配置</span>
+</div>
+
+<div class="content">
+
+<!-- ==================== 使用说明 ==================== -->
+<div class="section active" id="sec-info">
+  <h2>📌 使用说明</h2>
+  <div class="tb-wrap">
+  <table>
+    <tr><th>标记</th><th>含义</th><th>用时</th></tr>
+    <tr><td><span class="tag tag-basic">⭐ 基础</span></td><td>跟随讲师完成</td><td>5-10min</td></tr>
+    <tr><td><span class="tag tag-adv">⭐⭐ 进阶</span></td><td>独立完成，有挑战</td><td>10-15min</td></tr>
+    <tr><td><span class="tag tag-fire">🔥 综合</span></td><td>多模块串联</td><td>20-30min</td></tr>
+    <tr><td><span class="tag tag-home">🏠 课后</span></td><td>自行练习</td><td>自由安排</td></tr>
+  </table>
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);margin-top:8px">💡 点击顶部标签快速切换模块 · 所有填空行均可直接填写</p>
+</div>
+
+<!-- ==================== 模块1 ==================== -->
+<div class="section" id="sec-m1">
+  <h2>模块1 · 认识AI助手</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span></div>
+
+  <h3>⭐ 1.1 一句话定义WorkBuddy</h3>
+  <p>用一句话向同事介绍WorkBuddy。参考句式：</p>
+  <div class="tip">WorkBuddy是___，你只需___，它就能___。</div>
+  <p><strong>我的答案：</strong></p>
+  <span class="blank"></span>
+
+  <h3>⭐⭐ 1.2 场景选择题</h3>
+  <p>以下哪些场景最适合用WorkBuddy处理？（多选）</p>
+  <ul class="cl">
+    <li>写一份项目周报</li>
+    <li>选择今天中午的外卖</li>
+    <li>分析销售数据并生成图表</li>
+    <li>预约明天的会议室</li>
+    <li>批量处理100个文件的格式</li>
+    <li>打扫办公室卫生</li>
+  </ul>
+  <details><summary>✅ 查看答案</summary><div class="db">A（周报）· C（数据分析）· E（批量处理）。B/D/F不适合：外卖选择基于口味偏好，会议室涉及系统权限，打扫卫生是物理行为。</div></details>
+</div>
+
+<!-- ==================== 模块2 ==================== -->
+<div class="section" id="sec-m2">
+  <h2>模块2 · 5分钟上手</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span><span class="tag tag-home">🏠 课后</span></div>
+
+  <h3>⭐ 2.1 完成第一次对话</h3>
+  <p>先让AI认识你，再让它帮你干活：</p>
+  <ol class="steps">
+    <li>双击桌面WorkBuddy图标启动</li>
+    <li>输入：<code>"你好，我是[名字]，请简单介绍一下你能帮我做什么？"</code></li>
+    <li>按下回车，等待回复</li>
+    <li>追加实用需求：<code>"帮我写一段50字的工作总结"</code> 或 <code>"帮我拟一份会议议程"</code></li>
+  </ol>
+  <ul class="cl">
+    <li>成功收到AI回复</li>
+    <li>AI记住了上下文</li>
+    <li>AI输出了可用的内容</li>
+  </ul>
+
+  <h3>⭐⭐ 2.2 完成一次3轮追问</h3>
+  <p>选一个与你部门相关的场景，用对话模板完成3轮追问：</p>
+
+  <details>
+    <summary>🔬 研发 — 设计验证报告</summary>
+    <div class="db">①"帮我写一份PFO封堵器编织工艺设计验证报告模板"<br>②"增加材料疲劳测试数据模块"<br>③"保存为Word文档"</div>
+  </details>
+  <details>
+    <summary>📊 市场营销 — 销售分析报告</summary>
+    <div class="db">①"帮我写一份Q2销售分析报告大纲"<br>②"增加分区域销量对比和增长率章节"<br>③"调整为PPT格式，≤10页"</div>
+  </details>
+  <details>
+    <summary>📋 临床注册 — NMPA注册资料</summary>
+    <div class="db">①"列一份PFO封堵器三类注册文件清单"<br>②"按文件类型分类，标出需第三方检测项"<br>③"输出为Excel，含名称/状态/责任人三列"</div>
+  </details>
+  <details>
+    <summary>🏭 生产 — 生产质量分析</summary>
+    <div class="db">①"写一份月度生产质量分析报告模板"<br>②"增加良品率趋势图和异常批次记录表"<br>③"导出Word文档，正式风格"</div>
+  </details>
+  <details>
+    <summary>📦 采购 — 供应商评估</summary>
+    <div class="db">①"设计一份供应商评估表框架"<br>②"增加价格/质量/交期/服务四维度评分"<br>③"输出Excel，含权重分配和自动评分"</div>
+  </details>
+  <details>
+    <summary>🏥 医学 — 文献综述</summary>
+    <div class="db">①"检索PFO封堵器术后抗栓治疗临床研究"<br>②"按年份排序，提取每篇核心结论"<br>③"整理成摘要汇编，保存Word"</div>
+  </details>
+  <details>
+    <summary>✅ 质量 — 内审整改方案</summary>
+    <div class="db">①"拟一份内审不符合项整改方案模板"<br>②"增加根因分析和纠正措施两栏"<br>③"输出Excel跟踪表，含截止日期和责任人"</div>
+  </details>
+  <details>
+    <summary>💰 财务 — 费用分析报告</summary>
+    <div class="db">①"写一份月度部门费用分析报告大纲"<br>②"增加预算执行率对比和超预算标注"<br>③"转换为PPT，突出异常数据"</div>
+  </details>
+  <details>
+    <summary>🏢 行政 — 会议方案</summary>
+    <div class="db">①"设计一份年中总结会方案框架"<br>②"增加会议时间线和物料清单"<br>③"输出Word文档，正式格式含封面"</div>
+  </details>
+  <details>
+    <summary>👥 人力资源 — 招聘分析报告</summary>
+    <div class="db">①"写一份月度招聘分析报告模板"<br>②"增加各渠道简历/面试/入职率对比表"<br>③"加渠道ROI分析，推荐最优组合"</div>
+  </details>
+
+  <ul class="cl">
+    <li>完成3轮连续对话</li>
+    <li>AI记住了上下文</li>
+    <li>最终产物已保存</li>
+  </ul>
+
+  <h3>🏠 2.3 自由对话探索</h3>
+  <p>按「任务+输入+输出+约束」设计：</p>
+  <div class="tb-wrap">
+  <table>
+    <tr><th>部门</th><th>按四要素设计的提问</th></tr>
+    <tr><td>🔬 研发</td><td>"根据本周实验记录和测试数据（输入），按产品项目整理设计验证进展（任务），输出Word研发周报（输出），每项目含阶段完成率和下周计划（约束）"</td></tr>
+    <tr><td>📊 市场营销</td><td>"分析销售数据（输入），找出TOP3增长市场（任务），输出带图表PPT（输出），≤10页（约束）"</td></tr>
+    <tr><td>📋 临床注册</td><td>"根据注册文件清单（输入），分类梳理标记缺失项（任务），输出Excel跟踪表（输出），含进度%和状态标签（约束）"</td></tr>
+    <tr><td>🏭 生产</td><td>"分析上月生产日报（输入），按产线计算良品率和产能利用率（任务），输出Excel报告（输出），异常值标红（约束）"</td></tr>
+    <tr><td>📦 采购</td><td>"对比3家供应商报价单（输入），推荐最优方案（任务），输出对比分析表（输出），含综合评分和理由（约束）"</td></tr>
+    <tr><td>🏥 医学</td><td>"检索近3月PFO封堵器文献（输入），提取核心发现（任务），输出摘要报告（输出），按证据排序，每篇≤300字（约束）"</td></tr>
+    <tr><td>✅ 质量</td><td>"整理本月内审发现项（输入），按严重程度分类定位高频问题（任务），输出整改跟踪表（输出），含责任人和截止日期（约束）"</td></tr>
+    <tr><td>💰 财务</td><td>"分析上月费用报销明细（输入），按部门汇总对比预算（任务），输出费用分析报告（输出），含图表和超预算说明（约束）"</td></tr>
+    <tr><td>🏢 行政</td><td>"根据年中工作重点（输入），设计总结会方案（任务），输出Word会议流程（输出），含时间线、议程和物料清单（约束）"</td></tr>
+    <tr><td>👥 人力资源</td><td>"分析各渠道招聘数据（输入），评估ROI提出优化建议（任务），输出招聘分析报告（输出），含对比图表和预算分配（约束）"</td></tr>
+  </table>
+  </div>
+  <p><strong>我的需求：</strong></p>
+  <span class="blank"></span>
+  <p>理解准确度：⭐⭐⭐⭐⭐ 输出质量：⭐⭐⭐⭐⭐ 需要____轮追问</p>
+</div>
+
+<!-- ==================== 模块3 ==================== -->
+<div class="section" id="sec-m3">
+  <h2>模块3 · 任务管理</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span><span class="tag tag-home">🏠 课后</span></div>
+
+  <h3>⭐ 3.1 需求描述改错</h3>
+  <p>将以下差描述改写为好的描述：</p>
+  <div class="tb-wrap">
+  <table>
+    <tr><th>❌ 差的</th><th>✅ 我的改写</th></tr>
+    <tr><td>"帮我做一个报告"</td><td><span class="blank" style="height:20px"></span></td></tr>
+    <tr><td>"整理文件"</td><td><span class="blank" style="height:20px"></span></td></tr>
+    <tr><td>"分析一下这个数据"</td><td><span class="blank" style="height:20px"></span></td></tr>
+  </table>
+  </div>
+  <div class="tip" style="font-size:13px;line-height:1.8">
+    🎯<strong>任务</strong>=做什么&nbsp;&nbsp;📄<strong>输入</strong>=给什么&nbsp;&nbsp;📤<strong>输出</strong>=<strong style="color:#1d4ed8">正面要求</strong>（格式+风格+篇幅）&nbsp;&nbsp;⚠️<strong>约束</strong>=<strong style="color:#92400e">边界条件</strong>（限制+附加要求）
+  </div>
+  <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin-top:4px;border-top:1px dashed var(--border);padding-top:8px">
+    💡 告诉AI<strong>做什么（任务）</strong>，给它<strong>背景和材料（输入）</strong>，说清<strong>正面要求（输出）</strong>，划好<strong>边界条件（约束）</strong>
+  </p>
+
+  <h3>⭐⭐ 3.2 多任务并行实战</h3>
+  <p>同时创建2个任务让AI并行执行：</p>
+  <p><strong>任务A</strong>：分析考勤数据，按部门计算缺勤率，生成柱状图</p>
+  <p><strong>任务B</strong>：基于分析结果，撰写《考勤分析报告》（Markdown格式）</p>
+  <ul class="cl">
+    <li>成功同时发起2个任务</li>
+    <li>两个任务独立执行</li>
+    <li>分别查看两个结果</li>
+  </ul>
+
+  <h3>🏠 3.3 真实工作场景任务</h3>
+  <p>按「任务+输入+输出+约束」设计提问：</p>
+  <div class="tb-wrap">
+  <table>
+    <tr><th>部门</th><th>按四要素设计的提问</th></tr>
+    <tr><td>🔬 研发</td><td>"根据本周实验记录、测试数据和设计验证报告（输入），按产品项目（PFO封堵器/心房分流器）整理进展和技术问题（任务），输出Word研发周报（输出），含阶段完成率和下周计划（约束）"</td></tr>
+    <tr><td>📊 市场营销</td><td>"分析上月销售数据和渠道反馈（输入），找出TOP3增长最快的细分市场（任务），输出带图表PPT（输出），≤12页（约束）"</td></tr>
+    <tr><td>📋 临床注册</td><td>"根据注册文件清单和进度（输入），分类梳理标记缺失项和责任人（任务），输出Excel跟踪表（输出），含进度%和状态标签（约束）"</td></tr>
+    <tr><td>🏭 生产</td><td>"分析上月各产线日报（输入），计算良品率、产能利用率和异常停机次数（任务），输出Excel报告（输出），异常值标红并附根因建议（约束）"</td></tr>
+    <tr><td>📦 采购</td><td>"对比3家供应商报价和技术参数（输入），推荐性价比最优方案（任务），输出Word比价分析报告（输出），含综合评分和推荐理由（约束）"</td></tr>
+    <tr><td>🏥 医学</td><td>"检索近3月PFO封堵器临床文献（输入），提取核心发现和临床结论（任务），输出PDF摘要汇编（输出），按证据等级排序，每篇≤300字（约束）"</td></tr>
+    <tr><td>✅ 质量</td><td>"整理本月内审发现项（输入），按严重程度分类定位TOP3高频问题根因（任务），输出Excel整改跟踪表（输出），含责任人、截止日期和闭环状态（约束）"</td></tr>
+    <tr><td>💰 财务</td><td>"分析上月部门费用报销明细（输入），按部门汇总对比预算、找出超预算项（任务），输出带图表费用分析报告（输出），含异常说明和降本建议（约束）"</td></tr>
+    <tr><td>🏢 行政</td><td>"根据下半年工作重点和现有资源（输入），设计中会完整方案（任务），输出Word会议流程文档（输出），含时间线、议程、物料清单和预算（约束）"</td></tr>
+    <tr><td>👥 人力资源</td><td>"分析各招聘渠道简历数、面试通过率和入职率（输入），评估ROI给出预算分配建议（任务），输出带对比图表的招聘分析报告（输出），含优化优先级排序（约束）"</td></tr>
+  </table>
+  </div>
+  <p><strong>我选择的任务：</strong></p>
+  <span class="blank"></span>
+  <ul class="cl"><li>AI成功完成任务</li><li>结果可直接使用</li><li>需要____轮追问</li></ul>
+</div>
+
+<!-- ==================== 模块4 ==================== -->
+<div class="section" id="sec-m4">
+  <h2>模块4 · 界面精通与模式选择</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span></div>
+
+  <h3>⭐ 4.1 三区功能识别</h3>
+  <p>在WorkBuddy中找到各功能入口：</p>
+  <p><strong>左侧边栏</strong>：□新建任务 □Claw □专家 □技能 □探索 □连接器 □自动化 □设置</p>
+  <p><strong>中间区</strong>：□输入框 □文件上传 □模式切换（位于___）</p>
+  <p><strong>右侧区</strong>：□产物 □全部文件 □变更 □预览</p>
+
+  <h3>⭐⭐ 4.2 三模式渐进式体验</h3>
+  <p>场景：策划一次团队培训方案。分三阶段体验三种模式各司其职：</p>
+  <div class="tip" style="font-size:13px;text-align:center;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-color:#c7d2fe">
+    💬 Ask 信息收集 → 📋 Plan 方案审核 → 🛠️ Craft 执行出活
+  </div>
+
+  <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;margin:10px 0">
+    <div style="font-weight:600;color:var(--primary);margin-bottom:6px">① 💬 Ask → 信息收集</div>
+    <p style="font-size:13px;margin:0">问：<code>"团队培训方案一般包含哪些模块？常见形式有哪些？"</code></p>
+    <p style="font-size:12px;color:var(--text-secondary)">AI只给建议、不出文件。换Craft试试差别？<span class="blank" style="height:16px;margin-top:4px"></span></p>
+  </div>
+
+  <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin:10px 0">
+    <div style="font-weight:600;color:#92400e;margin-bottom:6px">② 📋 Plan → 方案审核</div>
+    <p style="font-size:13px;margin:0">切换Plan追问：<code>"请帮我设计一份培训方案，含时间安排和预算"</code></p>
+    <p style="font-size:12px;color:var(--text-secondary)">有没有"请确认"环节？□有 □没有<br>和Ask比多出来什么？<span class="blank" style="height:16px;margin-top:4px"></span></p>
+  </div>
+
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin:10px 0">
+    <div style="font-weight:600;color:#166534;margin-bottom:6px">③ 🛠️ Craft → 执行出活</div>
+    <p style="font-size:13px;margin:0">切换Craft：<code>"按确认的方案生成正式文档"</code></p>
+    <p style="font-size:12px;color:var(--text-secondary)">是否直接输出了可用文件？□是 □需修改</p>
+  </div>
+
+  <div class="tb-wrap" style="margin-top:12px">
+  <table>
+    <tr><th>场景</th><th>选什么模式？</th></tr>
+    <tr><td>刚接手任务，先了解方向</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>有思路了，需要领导确认方案</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>方案已定，需要快速出最终文件</td><td>□ Ask □ Plan □ Craft</td></tr>
+  </table>
+  </div>
+
+  <h3>⭐⭐ 4.3 模式选择测试</h3>
+  <div class="tb-wrap">
+  <table>
+    <tr><th>#</th><th>场景</th><th>选什么模式？</th></tr>
+    <tr><td>①</td><td>"帮我写一份详细的项目方案"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>②</td><td>"今天深圳天气怎么样？"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>③</td><td>"先分析数据，我同意再出报告"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>④</td><td>"把文档从Word转成PPT"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>⑤</td><td>"查一下上个月的报销政策"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>⑥</td><td>"brainstorm几个新产品命名方向"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>⑦</td><td>"把会议纪要整理成待办清单"</td><td>□ Ask □ Plan □ Craft</td></tr>
+    <tr><td>⑧</td><td>"做一份竞品分析，先出大纲我看看"</td><td>□ Ask □ Plan □ Craft</td></tr>
+  </table>
+  </div>
+  <details><summary>✅ 参考答案（共8题）</summary>
+    <div class="db">
+      ①项目方案→<strong>Craft</strong>·②天气→<strong>Ask</strong>·③先分析后报告→<strong>Plan</strong>·④Word转PPT→<strong>Craft</strong><br>
+      ⑤查政策→<strong>Ask</strong>·⑥brainstorm→<strong>Ask</strong>·⑦纪要→待办→<strong>Craft</strong>·⑧先出大纲→<strong>Plan</strong><br><br>
+      ⚠️ 注意：天气查询用Ask就够了，不需要AI执行任何操作。
+    </div>
+  </details>
+</div>
+
+<!-- ==================== 模块5 ==================== -->
+<div class="section" id="sec-m5">
+  <h2>模块5 · Claw远程控制</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span><span class="tag tag-home">🏠 课后</span></div>
+
+  <h3>⭐ 5.1 Claw接入</h3>
+  <ol class="steps">
+    <li>点击「Claw」图标</li>
+    <li>选择平台（微信小程序/企业微信）</li>
+    <li>手机扫码绑定</li>
+    <li>确认"已连接"状态</li>
+  </ol>
+  <ul class="cl">
+    <li>手机扫码成功</li>
+    <li>显示"已连接"</li>
+    <li>手机上能看到设备</li>
+  </ul>
+
+  <h3>⭐⭐ 5.2 远程执行任务</h3>
+  <ol class="steps">
+    <li>打开Claw小程序</li>
+    <li>选择一条指令发送（见下方经典任务）</li>
+    <li>发送并等待执行</li>
+    <li>查看手机返回结果</li>
+  </ol>
+
+  <div class="tb-wrap">
+  <table>
+    <tr><th>#</th><th>场景</th><th>远程指令</th><th>✅ 为什么能用</th></tr>
+    <tr><td>①</td><td>📁 查文件</td><td>"查一下电脑桌面上有哪些文件"</td><td>只读不写，零风险</td></tr>
+    <tr><td>②</td><td>🔍 搜文档</td><td>"搜索文件名含'报告'的Word文档"</td><td>搜索操作，零依赖</td></tr>
+    <tr><td>③</td><td>⏰ 查状态</td><td>"看看WorkBuddy里有几个运行中的任务"</td><td>查任务列表，无需配置</td></tr>
+    <tr><td>④</td><td>🖥️ 看系统</td><td>"看看电脑磁盘空间还剩多少"</td><td>系统信息查询</td></tr>
+    <tr><td>⑤</td><td>📅 查时间</td><td>"今天是几号？现在几点？"</td><td>最简单的连接确认</td></tr>
+  </table>
+  </div>
+  <p style="font-size:12px;color:var(--text-secondary)">💡 第一次用建议选①或⑤确认连接成功，再尝试②③</p>
+
+  <p>发送时间：<span class="blank" style="height:18px;display:inline-block;width:80px"></span>，执行耗时：____秒</p>
+
+  <h3>🏠 5.3 远程场景设计</h3>
+  <p>我想用远程控制的场景：</p>
+  <span class="blank"></span>
+</div>
+
+<!-- ==================== 模块6 ==================== -->
+<div class="section" id="sec-m6">
+  <h2>模块6 · 角色配置（SOUL.md）</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span></div>
+
+  <div class="card" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-color:#c7d2fe">
+    <div style="font-weight:600;color:var(--primary);margin-bottom:4px">📌 四层身份文件体系</div>
+    <table style="width:100%;font-size:13px;border-collapse:collapse">
+      <tr><td><strong>SOUL.md</strong></td><td>AI的灵魂定义（身份+风格+边界）</td><td>"你是谁，怎么说话"</td></tr>
+      <tr><td><strong>IDENTITY.md</strong></td><td>身份记录</td><td>"你是谁"</td></tr>
+      <tr><td><strong>USER.md</strong></td><td>用户画像</td><td>"你的用户是谁"</td></tr>
+      <tr><td><strong>MEMORY.md</strong></td><td>长期记忆</td><td>"记得什么"</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:16px">📝 写SOUL.md的五步法</h3>
+  <ol class="steps">
+    <li><strong>定义身份</strong> → "你是XX领域的专家"</li>
+    <li><strong>设定风格</strong> → "说人话，用类比解释"</li>
+    <li><strong>明确边界</strong> → "不该做的事"</li>
+    <li><strong>标注知识</strong> → "知识库在哪里"</li>
+    <li><strong>写价值宣言</strong> → "你的核心使命"</li>
+  </ol>
+
+  <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;margin:14px 0">
+    <div style="font-weight:700;color:#dc2626;margin-bottom:6px">⏰ 重要：先测基线，再配配置</div>
+    <p style="font-size:13px;margin:0">
+      <strong>①</strong> 在下方选一个测试问题，问<strong>默认AI</strong>记录回答 → <strong>②</strong> 完成6.2-6.3配置练习 → 
+      <strong>③</strong> 用<strong>配置后AI</strong>问同一个问题 → <strong>④</strong> 对比差异
+    </p>
+  </div>
+
+  <h3>⭐ 6.1 AB对比测试（先测基线）</h3>
+  <div class="tb-wrap">
+  <table style="font-size:12px">
+    <tr><th>部门</th><th>测试问题</th><th>配置前</th><th>配置后</th></tr>
+    <tr><td>🔬研发</td><td>"分析镍钛合金在PFO封堵器中的应用优势和风险"</td><td>百科式</td><td>结论→数据→风险→建议</td></tr>
+    <tr><td>📊市场营销</td><td>"分析上月销售数据，找出增长最快区域"</td><td>笼统</td><td>先结论→分区域对比→表格</td></tr>
+    <tr><td>📋临床注册</td><td>"NMPA三类注册证变更需要什么流程？"</td><td>照搬法规</td><td>简洁流程+风险提示+标"待核实"</td></tr>
+    <tr><td>🏭生产</td><td>"生产线良品率下降，分析可能原因"</td><td>通用建议</td><td>结论→数据→根因→行动建议</td></tr>
+    <tr><td>📦采购</td><td>"如何评估这家新供应商？"</td><td>通用框架</td><td>四维评分+综合推荐</td></tr>
+    <tr><td>🏥医学</td><td>"PFO封堵器术后抗栓治疗有什么新研究？"</td><td>通用罗列</td><td>证据等级排序+来源标注</td></tr>
+    <tr><td>✅质量</td><td>"ISO 13485内审最常发现的缺陷项？"</td><td>标准清单</td><td>高频问题→根因→整改建议</td></tr>
+    <tr><td>💰财务</td><td>"分析上月费用结构，找出异常项"</td><td>通用分析</td><td>先数据→表格→异常标红</td></tr>
+    <tr><td>🏢行政</td><td>"安排下周年中总结会"</td><td>通用模板</td><td>结论→流程→物料→预算</td></tr>
+    <tr><td>👥人力资源</td><td>"招聘转化率低，分析原因给建议"</td><td>笼统建议</td><td>先数据→分渠道→行动建议</td></tr>
+  </table>
+  </div>
+  <p style="font-size:13px;margin:8px 0"><strong>配置前</strong>回答：</p><span class="blank"></span>
+  <p style="font-size:13px;margin:8px 0"><strong>配置后</strong>回答：</p><span class="blank"></span>
+  <ul class="cl" style="font-size:13px">
+    <li>风格不同？结构不同？质量不同？红线生效？</li>
+  </ul>
+
+  <h3>⭐⭐ 6.2 引导式配置SOUL.md</h3>
+  <p>SOUL.md包含4大模块：角色名称→职责范围→能力素质→行为准则（✅可以做的 + ❌不能做的）</p>
+  <div class="tb-wrap">
+  <table style="font-size:13px">
+    <tr><th>#</th><th>模块</th><th>引导问题</th><th>我的回答</th></tr>
+    <tr><td>①</td><td rowspan="2"><strong>角色名称</strong></td><td>AI扮演什么角色？起个名字</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>②</td><td>核心定位？一句话描述</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>③</td><td rowspan="2"><strong>职责范围</strong></td><td>AI主要帮你做什么？3-5项核心任务</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>④</td><td>服务边界？不做什么？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>⑤</td><td rowspan="2"><strong>能力素质</strong></td><td>需要哪些核心能力？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>⑥</td><td>性格特点？表达习惯？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>⑦</td><td rowspan="3"><strong>行为准则</strong></td><td>✅ 应该怎么做？（规范/格式/语气）</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>⑧</td><td>❌ 绝对不能做什么？（红线）</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    <tr><td>⑨</td><td>不确定的信息怎么处理？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+  </table>
+  </div>
+
+  <h3>⭐⭐ 6.3 引导式配置IDENTITY.md + USER.md</h3>
+  <p>回答引导问题，逐项填写，生成完整的IDENTITY.md和USER.md。</p>
+
+  <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;margin:10px 0">
+    <div style="font-weight:600;color:var(--primary);margin-bottom:8px">📄 IDENTITY.md — AI的外在标识</div>
+    <div class="tb-wrap">
+    <table style="font-size:13px">
+      <tr><th>#</th><th>引导问题</th><th>示例</th><th>我的回答</th></tr>
+      <tr><td>①</td><td>AI叫什么名字？（日常称呼）</td><td>Wei Buddy / 小助 / 小龙虾</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+      <tr><td>②</td><td>用什么表情符号代表？（显示在侧边栏）</td><td>👥 🤝 ⚡ 🎯 🔍</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+      <tr><td>③</td><td>角色标签是什么？一句话概括职能</td><td>"人力资源管理领域的专家助手"</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    </table>
+    </div>
+    <details>
+      <summary>📄 生成的IDENTITY.md</summary>
+      <div class="db">
+<pre><code># IDENTITY.md - 我的数字同事档案
+
+name: [______]
+emoji: [______]
+role: [______]</code></pre>
+      </div>
+    </details>
+  </div>
+
+  <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin:10px 0">
+    <div style="font-weight:600;color:#92400e;margin-bottom:8px">📄 USER.md — 让AI认识你</div>
+    <div class="tb-wrap">
+    <table style="font-size:13px">
+      <tr><th>#</th><th>模块</th><th>引导问题</th><th>我的回答</th></tr>
+      <tr><td>①</td><td rowspan="3"><strong>基本信息</strong></td><td>你的名字怎么称呼？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+      <tr><td>②</td><td>你的职位和组织是什么？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+      <tr><td>③</td><td>你的负责范围和团队规模？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+      <tr><td>④</td><td rowspan="2"><strong>工作偏好</strong></td><td>你偏好什么文档格式和回复风格？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+      <tr><td>⑤</td><td>你使用什么工具和系统？有什么技术背景？</td><td><span class="blank" style="height:18px;min-width:80px"></span></td></tr>
+    </table>
+    </div>
+    <details>
+      <summary>📄 生成的USER.md</summary>
+      <div class="db">
+<pre><code># USER.md
+
+## 基本信息
+- 名字：[______]
+- 身份：[______]
+- 负责范围：[______]
+- 团队规模：[______]
+
+## 工作偏好
+- 文档输出：[______]
+- 回复风格：[______]
+- 文件格式：[______]
+
+## 技术背景
+- [______]</code></pre>
+      </div>
+    </details>
+    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px">✅ 全部配置完成后，回到6.1对比你的AB测试结果</p>
+  </div>
+</div>
+<!-- ==================== 模块7 ==================== -->
+<div class="section" id="sec-m7">
+  <h2>模块7 · 能力扩展</h2>
+  <div class="level"><span class="tag tag-basic">⭐ 基础</span><span class="tag tag-adv">⭐⭐ 进阶</span></div>
+
+  <h3>⭐ 7.1 安装一个技能</h3>
+  <ol class="steps">
+    <li>打开「技能」→ 浏览市场</li>
+    <li>选择一个技能（见推荐清单）→ 点击「安装」</li>
+    <li>安装完成后试用</li>
+  </ol>
+
+  <div class="tip" style="font-size:12px;padding:8px 10px">
+    <strong>🏆 必备技能推荐</strong>（来源：WorkBuddy官方零成本精选+SkillHub）<br>
+    🔍 <strong>web-search</strong> 联网搜索 · 📄 <strong>nano-pdf</strong> PDF处理<br>
+    📦 <strong>office-document-suite</strong> 办公四件套 · 🧠 <strong>find-skills</strong> 技能发现<br>
+    🔄 <strong>self-improvement</strong> 自我进化 · 📝 <strong>summarize</strong> 内容摘要<br>
+    🗂️ <strong>file-organizer</strong> 文件整理 · 🌐 <strong>agent-browser</strong> 浏览器代理
+  </div>
+
+  <p>我安装的技能：<span class="blank" style="display:inline-block;width:120px;height:18px"></span></p>
+  <p>试用结果：⭐⭐⭐⭐⭐</p>
+
+  <h3>⭐⭐ 7.2 连接一个外部服务</h3>
+  <ol class="steps">
+    <li>打开「连接器管理」→ 点击「+」</li>
+    <li>选择目标服务 → 完成授权</li>
+    <li>验证：<code>"帮我[做某事]"</code></li>
+  </ol>
+  <p>我连接的服务：<span class="blank" style="display:inline-block;width:120px;height:18px"></span>· 授权方式：□OAuth □Token □CLI</p>
+
+  <h3>⭐⭐ 7.3 创建第一个自动化任务</h3>
+  <ol class="steps">
+    <li>打开「自动化」→ 点击「添加」</li>
+    <li>选择部门推荐任务（见下方），填入名称、提示词、频率</li>
+    <li>保存并启用</li>
+  </ol>
+  <div class="tb-wrap">
+  <table style="font-size:12px">
+    <tr><th>部门</th><th>任务名称</th><th>频率</th></tr>
+    <tr><td>🔬研发</td><td>每周一汇总实验进展，按项目出周报</td><td>WEEKLY;BYDAY=MO;BYHOUR=9</td></tr>
+    <tr><td>📊市场营销</td><td>每日8点汇总销售数据，出简报</td><td>DAILY;BYHOUR=8</td></tr>
+    <tr><td>📋临床注册</td><td>每周五检查NMPA项目进度</td><td>WEEKLY;BYDAY=FRI;BYHOUR=16</td></tr>
+    <tr><td>🏭生产</td><td>每日7点出产线良品率日报</td><td>DAILY;BYHOUR=7</td></tr>
+    <tr><td>📦采购</td><td>每周一到货跟踪提醒</td><td>WEEKLY;BYDAY=MON;BYHOUR=9</td></tr>
+    <tr><td>🏥医学</td><td>每周一PFO文献检索摘要</td><td>WEEKLY;BYDAY=MON;BYHOUR=10</td></tr>
+    <tr><td>✅质量</td><td>每周三内审整改催办</td><td>WEEKLY;BYDAY=WED;BYHOUR=14</td></tr>
+    <tr><td>💰财务</td><td>每周一费用报销汇总分析</td><td>WEEKLY;BYDAY=MON;BYHOUR=9</td></tr>
+    <tr><td>🏢行政</td><td>每周日检查会议安排发提醒</td><td>WEEKLY;BYDAY=SUN;BYHOUR=20</td></tr>
+    <tr><td>👥人力资源</td><td>每周一出考勤异常报告</td><td>WEEKLY;BYDAY=MON;BYHOUR=9</td></tr>
+  </table>
+  </div>
+  <ul class="cl">
+    <li>任务已创建</li>
+    <li>状态为"启用"</li>
+    <li>知道如何查看执行日志</li>
+  </ul>
+</div>
+
+<!-- ==================== 综合实战 ==================== -->
+<div class="section" id="sec-final">
+  <h2>🔥 综合实战</h2>
+
+  <h3>🔥 实战1：端到端工作流</h3>
+  <p>串联全模块，完成一个完整工作流：</p>
+  <ol class="steps">
+    <li>Claw远程发起任务（模块5）</li>
+    <li>让AI分析配置样本或工作数据（模块3）</li>
+    <li>生成分析报告（模块2）</li>
+    <li>设置自动化任务，每周自动生成（模块7）</li>
+    <li>通过QQ邮箱发送给同事（模块7）</li>
+  </ol>
+  <p>总用时：____分钟 · 完成成功率：____/5步</p>
+
+  <h3>🔥 实战2：为团队配置AI助手</h3>
+  <p>假设你是一个团队负责人：</p>
+  <ul class="cl">
+    <li>写一份SOUL.md（身份+风格+边界）</li>
+    <li>安装1个团队有用的技能</li>
+    <li>创建1个自动化任务</li>
+    <li>连接1个外部服务</li>
+  </ul>
+  <p>我的配置方案：</p>
+  <span class="blank"></span><span class="blank"></span><span class="blank"></span>
+
+  <h3>🔥 实战3：搭建个人AI工作流</h3>
+  <div class="card">
+    <div class="card-title">思考框架</div>
+    ① 我的重复性工作（哪些可以交给AI）<br>
+    ② 我的AI配置（角色/技能/连接器）<br>
+    ③ 我的自动化计划（每日/每周/每月）
+  </div>
+  <div class="tip" style="font-size:13px">
+    <strong>部门工作参考</strong>：🔬研发→器械设计/材料测试/产品验证 · 📊市场营销→销售分析/竞品报告<br>
+    📋临床注册→文件准备/法规跟踪 · 🏭生产→日报/排产 · 📦采购→供应商评估/比价<br>
+    🏥医学→文献检索/临床数据 · ✅质量→巡检/整改 · 💰财务→费用/预算/报销<br>
+    🏢行政→会议/通知/资产 · 👥人力资源→考勤/招聘/培训
+  </div>
+  <p><strong>我的AI工作流：</strong></p>
+  <span class="blank"></span><span class="blank"></span><span class="blank"></span>
+  <span class="blank"></span><span class="blank"></span>
+</div>
+
+<!-- ==================== 经典配置样本 ==================== -->
+<div class="section" id="sec-data">
+  <h2>📁 经典配置样本</h2>
+  <p style="font-size:13px;color:var(--text-secondary)">来自腾讯云开发者社区及WorkBuddy开源社区的公开配置案例，严格按6.2-6.3引导问题结构编写。</p>
+
+  <details>
+    <summary>📄 SOUL.md — "职场效率助手 小龙虾"（社区经典）</summary>
+    <div class="db" style="font-size:12px">
+<pre><code># 小龙虾 - 职场效率助手
+
+## 职责范围
+1. 处理日常文档撰写、数据整理、报告生成等办公任务
+2. 辅助信息检索与深度研究，提供结构化分析结果
+3. 协助代码编写、调试和技术文档维护
+4. 不处理涉及人身安全、法律纠纷和专业医疗诊断的请求
+
+## 能力素质
+- 核心能力：文档处理 / 数据分析 / 研究辅助
+- 性格特点：务实优先、主动执行、可信赖
+- 表达习惯：开场"任务已收到 🚀"，交付"搞定了 👀"
+
+## 行为准则
+✅ 应该做的：
+- 接到任务直接规划执行，多步骤分阶段交付
+- 简洁直接，先给结论再展开细节
+- 用"我们"体现协作感，使用适量emoji
+- 识别高危操作时主动提示确认
+
+❌ 不能做的：
+- 禁止透露敏感信息和机密凭据
+- 禁止未经确认代发消息或做承诺
+- 禁止执行破坏性命令
+- 遇到不确定的问题标注"待核实"</code></pre>
+    </div>
+  </details>
+
+  <details>
+    <summary>📄 IDENTITY.md — "小助"（社区通用版）</summary>
+    <div class="db">
+<pre><code># IDENTITY.md - 我的数字同事档案
+
+name: 小助
+creature: 职场效率助手
+vibe: 专业、高效、略带幽默
+emoji: ⚡</code></pre>
+    </div>
+  </details>
+
+  <details>
+    <summary>📄 USER.md — 两种职业视角（开源社区版）</summary>
+    <div class="db" style="font-size:12px">
+<p><strong>版本A — 销售经理：</strong></p>
+<pre><code># USER.md
+
+## 基本信息
+- 名字：王强
+- 身份：华北区大区销售经理
+- 负责范围：50家企业客户，团队5人
+- 常用工具：Salesforce、企业微信、Excel
+
+## 工作偏好
+- 周报需含客户拜访记录和跟进计划
+- 喜欢数据驱动的分析，先给数字再给建议
+- 文件格式：Excel数据表 + 简报式总结
+
+## 技术背景
+- 熟练使用CRM系统
+- 熟悉Excel数据透视表和VLOOKUP</code></pre>
+<p><strong>版本B — 设计师：</strong></p>
+<pre><code># USER.md
+
+## 基本信息
+- 名字：李美
+- 身份：UI设计师
+- 负责范围：公司App和官网界面设计
+- 常用工具：Figma、Sketch、Principle
+
+## 工作偏好
+- 喜欢先给2-3个设计方向再细化
+- 对字体、配色、间距敏感
+- 输出：设计稿链接 + 设计说明文档
+
+## 技术背景
+- 熟悉设计系统搭建
+- 了解HTML/CSS基础</code></pre>
+    </div>
+  </details>
+
+  <details>
+    <summary>📄 SOUL.md 进阶 — "AI公司CEO 楚云"</summary>
+    <div class="db" style="font-size:12px">
+<pre><code># 楚云 - AI公司CEO
+
+## 职责范围
+1. 接收任务后先编译：模糊需求→结构化指令
+2. 拆解任务：大任务→并行子任务，分配不同部门
+3. 并行执行：多个部门同时工作
+4. 汇总交付：整合结果，输出完整交付物
+
+## 能力素质
+- 核心能力：任务编译 / 任务拆解 / 多智能体调度
+- 性格特点：领导者思维、结果导向、有条理
+- 表达习惯：所有任务生成项目编号（PRJ-YYYY-NNN）
+
+## 行为准则
+✅ 应该做的：
+- 接到任务先生成项目编号，经编译器处理
+- 汇报时先给结论再展开
+- 资源冲突或边界模糊时主动请示
+
+❌ 不能做的：
+- 不编造数据来源和分析依据
+- 不擅自调用未授权工具或服务
+- 不承诺无法实现的功能或时间节点
+- 不确定信息标注"待核实"并说明原因</code></pre>
+    </div>
+  </details>
+
+  <div class="tip">💡 先复制IDENTITY.md+USER.md改为自己的信息，再修改SOUL.md样本。配置后用6.4 AB测试验证效果。</div>
+</div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('info')"><span class="icon">📌</span>说明</button>
+  <button class="nav-btn" onclick="switchTab('m1')"><span class="icon">1</span>模块1</button>
+  <button class="nav-btn" onclick="switchTab('m4')"><span class="icon">4</span>模块4</button>
+  <button class="nav-btn" onclick="switchTab('final')"><span class="icon">🔥</span>实战</button>
+  <button class="nav-btn" onclick="switchTab('data')"><span class="icon">📄</span>配置</button>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  const tab = document.querySelector(`.tab[onclick*="'${id}'"]`);
+  if (tab) tab.classList.add('active');
+  const nav = document.querySelector(`.nav-btn[onclick*="'${id}'"]`);
+  if (nav) nav.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleView() {
+  const body = document.body;
+  const isPC = body.classList.toggle('pc-mode');
+  const icon = document.getElementById('toggleIcon');
+  const label = document.getElementById('toggleLabel');
+  if (isPC) {
+    icon.textContent = '📱';
+    label.textContent = '手机';
+    // Show all sections in PC mode
+    document.querySelectorAll('.section').forEach(s => s.classList.add('active'));
+  } else {
+    icon.textContent = '🖥️';
+    label.textContent = 'PC';
+    // Restore mobile: only keep active section
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const firstSection = document.getElementById('sec-info');
+    if (firstSection) firstSection.classList.add('active');
+  }
+}
+</script>
+
+</body>
+</html>
