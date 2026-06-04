@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorkBuddy使用分享会 - 海报</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 30px 16px;
+      color: #1e293b;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .poster {
+      width: 540px;
+      max-width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: visible;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(91,141,239,0.10), 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       模块1：Logo / 机构
+    ═══════════════════════════════════════════════════ */
+    .org-bar {
+      background: linear-gradient(160deg, #EEF3FF 0%, #F3F0FF 50%, #EEF8FF 100%);
+      padding: 20px 28px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 16px 16px 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .org-bar::before {
+      content: "";
+      position: absolute;
+      top: -30px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(91,141,239,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .org-logo {
+      width: 62px;
+      height: 62px;
+      background: #fff;
+      border-radius: 14px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(91,141,239,0.08);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .org-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .org-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f1a3a;
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+    .org-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #5B8DEF, #7C5CFC);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      letter-spacing: 0.5px;
+      vertical-align: middle;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       模块2：培训课程名称
+    ═══════════════════════════════════════════════════ */
+    .title-section {
+      padding: 24px 28px 20px;
+      text-align: center;
+      position: relative;
+    }
+    .title-section::after {
+      content: "";
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(135deg, #5B8DEF, #7C5CFC);
+      border-radius: 3px;
+      margin: 16px auto 0;
+    }
+    .course-label {
+      display: inline-block;
+      background: linear-gradient(135deg, #5B8DEF, #7C5CFC);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+    .course-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f1a3a;
+      line-height: 1.3;
+      letter-spacing: 0.5px;
+    }
+    .course-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       模块3：日期/时间/地点
+    ═══════════════════════════════════════════════════ */
+    .info-section {
+      padding: 4px 28px 20px;
+    }
+    .info-card {
+      background: #f3f6fe;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .info-icon {
+      width: 28px;
+      height: 28px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(91,141,239,0.08);
+    }
+    .info-icon svg { width: 16px; height: 16px; stroke: #5B8DEF; fill: none; stroke-width: 2; }
+    .info-content { flex: 1; }
+    .info-label {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+    .info-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.4;
+    }
+    .addr-line {
+      display: flex;
+      gap: 0;
+    }
+    .addr-label {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .addr-text {
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    /* 线上直播链接 */
+    .online-link {
+      color: #5B8DEF;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      word-break: break-all;
+    }
+    .online-link:hover { color: #6d4ef0; }
+
+    /* 导航按钮 */
+    .nav-wrap { position: relative; display: inline-block; margin-top: 4px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: linear-gradient(135deg, #5B8DEF, #7C5CFC); color: #fff;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 14px; cursor: pointer;
+      user-select: none; letter-spacing: 0.5px;
+    }
+    .nav-btn:hover { opacity: 0.9; }
+    .nav-menu {
+      display: none; position: absolute; top: 100%; left: 0; margin-top: 4px;
+      background: #fff; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      overflow: hidden; z-index: 10; min-width: 170px;
+    }
+    .nav-menu.show { display: block; }
+    .nav-item {
+      display: block; padding: 8px 14px; font-size: 12px; color: #1e293b;
+      text-decoration: none; border-bottom: 1px solid #e2e8f0;
+    }
+    .nav-item:last-child { border-bottom: none; }
+    .nav-item:hover { background: #f3f6fe; color: #5B8DEF; }
+
+    /* ═══════════════════════════════════════════════════
+       模块4：分享嘉宾
+    ═══════════════════════════════════════════════════ */
+    .sec-header {
+      padding: 16px 28px 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sec-header::before {
+      content: "";
+      width: 3px;
+      height: 16px;
+      background: linear-gradient(to bottom, #5B8DEF, #7C5CFC);
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .sec-header-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f1a3a;
+    }
+    .sec-header-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, #e2e8f0, transparent);
+    }
+    .speakers-body {
+      padding: 10px 28px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .speaker-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #FAFBFF, #F5F3FF);
+      border-radius: 12px;
+      padding: 16px 18px;
+      border: 1px solid #e2e8f0;
+    }
+    .speaker-photo {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #f0f2f5;
+    }
+    .speaker-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .speaker-detail { flex: 1; }
+    .sp-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f1a3a;
+      letter-spacing: 0.5px;
+    }
+    .sp-title {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+    .sp-badge {
+      font-size: 9px;
+      color: #7C5CFC;
+      background: #f0edff;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       模块5：课程介绍
+    ═══════════════════════════════════════════════════ */
+    .course-body {
+      padding: 6px 28px 12px;
+    }
+    .course-outline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .outline-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f3f6fe;
+      border-radius: 6px;
+      padding: 5px 10px;
+      width: calc(50% - 2px);
+    }
+    .outline-num {
+      width: 18px; height: 18px;
+      background: linear-gradient(135deg, #5B8DEF, #7C5CFC);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .outline-text {
+      font-size: 12px;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       模块6：报名方式
+    ═══════════════════════════════════════════════════ */
+    .reg-section {
+      background: linear-gradient(160deg, #EEF3FF 0%, #F3F0FF 50%, #EEF8FF 100%);
+      padding: 20px 28px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border-radius: 0 0 16px 16px;
+    }
+    .reg-qr {
+      width: 90px; height: 90px;
+      background: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(91,141,239,0.10);
+      overflow: hidden;
+      padding: 6px;
+    }
+    .reg-qr img { width: 100%; height: 100%; object-fit: contain; }
+    .reg-info { flex: 1; }
+    .reg-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f1a3a;
+      margin-bottom: 4px;
+    }
+    .reg-desc {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .reg-tip {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="poster">
+
+    <div class="org-bar">
+      <div class="org-logo">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%235B8DEF' rx='30'/%3E%3Ctext x='100' y='125' font-size='72' fill='white' text-anchor='middle' font-family='sans-serif' font-weight='bold'%3EW%3C/text%3E%3C/svg%3E" alt="Wei Buddy Logo">
+      </div>
+      <div class="org-name">
+        上海交大湖北校友会人工智能分会（筹）<span class="org-badge">主办</span>
+      </div>
+    </div>
+
+    <div class="title-section">
+      <div class="course-label">AI 实践分享</div>
+      <div class="course-title">WorkBuddy使用分享会</div>
+      <div class="course-subtitle">让AI成为你真正的专属工作伙伴</div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-card">
+        <div class="info-row">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="info-content">
+            <div class="info-label">活动日期</div>
+            <div class="info-value">2026年6月6日</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="info-content">
+            <div class="info-label">活动时间</div>
+            <div class="info-value">9:00–12:00</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="info-content">
+            <div class="info-label">活动地点</div>
+            <div class="info-value">
+              <div class="addr-line">
+                <span class="addr-label">线下：</span>
+                <span class="addr-text">
+                  高新大道 999 号未来科技城 C2 栋裙楼 3 楼<br>
+                  湖北省海创中心三楼会议厅
+                  <span class="nav-wrap" onclick="event.stopPropagation()">
+                <span class="nav-btn" onclick="document.getElementById('nav-menu').classList.toggle('show')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 13 8 13s8-7.6 8-13a8 8 0 0 0-8-8z"/></svg>
+                  导航
+                </span>
+                <div class="nav-menu" id="nav-menu">
+                  <a class="nav-item" href="https://uri.amap.com/navigation?to=114.538741,30.492563,湖北省海创中心三楼会议厅&mode=car&callnative=1" target="_blank">🚗 高德地图 · 驾车导航</a>
+                  <a class="nav-item" href="https://map.baidu.com/dir?destination=湖北省武汉市江夏区高新大道999号未来科技城C2栋&mode=driving&src=WorkBuddy" target="_blank">🚗 百度地图 · 驾车导航</a>
+                  <a class="nav-item" href="https://n.dingtalk.com/dingding/live-room/index.html?roomId=sWyIAIRhuF" target="_blank">📺 钉钉线上直播间</a>
+                </div>
+              </span>
+                </span>
+              </div>
+              <div class="addr-line">
+                <span class="addr-label">线上：</span>
+                <span class="addr-text">
+                  <a class="online-link" href="https://n.dingtalk.com/dingding/live-room/index.html?roomId=sWyIAIRhuF" target="_blank">点击进入钉钉直播间 ›</a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-header">
+      <span class="sec-header-text">分享嘉宾</span>
+      <span class="sec-header-line"></span>
+    </div>
+    <div class="speakers-body">
+      <div class="speaker-card">
+        <div class="speaker-photo">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23e2e8f0'/%3E%3Ctext x='50' y='60' font-size='40' fill='%2394a3b8' text-anchor='middle' font-family='sans-serif'%3EL%3C/text%3E%3C/svg%3E" alt="李恒之">
+        </div>
+        <div class="speaker-detail">
+          <div class="sp-name">李恒之</div>
+          <div class="sp-title">上海交通大学 MBA<br>医疗器械公司人力资源总监</div>
+        </div>
+      </div>
+      <div class="speaker-card">
+        <div class="speaker-photo">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23e2e8f0'/%3E%3Ctext x='50' y='60' font-size='40' fill='%2394a3b8' text-anchor='middle' font-family='sans-serif'%3EW%3C/text%3E%3C/svg%3E" alt="Wei Buddy">
+        </div>
+        <div class="speaker-detail">
+          <div class="sp-name">Wei Buddy</div>
+          <div class="sp-title">AI 人力资源管理专家 / WorkBuddy 智能助手</div>
+          <div class="sp-badge" style="margin-top:4px;">AI 嘉宾</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-body">
+      <div style="font-size:13px;font-weight:700;color:#0f1a3a;margin-bottom:8px;">课程内容</div>
+      <div class="course-outline">
+        <div class="outline-item"><span class="outline-num">1</span><span class="outline-text">AI 认知破局</span></div>
+        <div class="outline-item"><span class="outline-num">2</span><span class="outline-text">WorkBuddy 平台介绍</span></div>
+        <div class="outline-item"><span class="outline-num">3</span><span class="outline-text">AI 智能体实战</span></div>
+        <div class="outline-item"><span class="outline-num">4</span><span class="outline-text">HR 场景应用</span></div>
+        <div class="outline-item"><span class="outline-num">5</span><span class="outline-text">打造专属工作流</span></div>
+        <div class="outline-item"><span class="outline-num">6</span><span class="outline-text">现场答疑交流</span></div>
+      </div>
+    </div>
+
+    <div class="reg-section">
+      <div class="reg-qr">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='white'/%3E%3Cg transform='translate(20,20)'%3E%3Crect x='0' y='0' width='30' height='30' fill='%23000'/%3E%3Crect x='40' y='0' width='30' height='30' fill='%23000'/%3E%3Crect x='80' y='0' width='30' height='30' fill='%23000'/%3E%3Crect x='0' y='40' width='30' height='30' fill='%23000'/%3E%3Crect x='80' y='40' width='30' height='30' fill='%23000'/%3E%3Crect x='0' y='80' width='30' height='30' fill='%23000'/%3E%3Crect x='40' y='80' width='30' height='30' fill='%23000'/%3E%3Crect x='80' y='80' width='30' height='30' fill='%23000'/%3E%3Crect x='130' y='0' width='30' height='30' fill='%23000'/%3E%3Crect x='130' y='40' width='30' height='30' fill='%23000'/%3E%3Crect x='130' y='80' width='30' height='30' fill='%23000'/%3E%3C/g%3E%3C/svg%3E" alt="QR Code">
+      </div>
+      <div class="reg-info">
+        <div class="reg-title">报名参加</div>
+        <div class="reg-desc">长按识别小程序码参与接龙<br>公益活动，名额有限</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 点击页面其他区域关闭导航菜单 -->
+  <script>
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.nav-wrap')) {
+        document.querySelectorAll('.nav-menu.show').forEach(m => m.classList.remove('show'));
+      }
+    });
+  </script>
+
+</body>
+</html>
